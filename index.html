@@ -555,7 +555,7 @@ if(g.multi){const item=g.item;const filtered=fs2(item.steps,series);const nm=lan
 else{const md=lang==='en'?(MNE[key]||key):key;let allS=[];g.items.forEach(item=>{allS=allS.concat(fs2(item.steps,series))});html+=`<div class="module-group"><h3><span class="module-tag tag-${moduleColors[key]||key}">${md}</span> ${g.items.length}${tk('projs')} · ${allS.length}${tk('steps')}</h3><div class="steps">`;g.items.forEach(item=>{const filtered=fs2(item.steps,series);const nm=lang==='en'?item.nameEn:item.name;html+=`<div class="project-block"><div class="project-title">${nm} <span class="en">${lang==='zh'?item.nameEn:''}</span> <span style="font-size:11px;color:var(--text2)">${filtered.length}${tk('steps')}</span></div>${renderSteps(item.steps,series,0)}</div>`});html+='</div></div>'}}
 html+=`<div style="margin-top:16px;padding:12px;background:#e8a83811;border:1px solid var(--accent);border-radius:8px;font-size:12px">${tk('warn')}</div>`;document.getElementById('outputContent').innerHTML=html;document.getElementById('outputCount').textContent=selected.length;document.getElementById('outputSection').style.display='block';document.getElementById('outputSection').scrollIntoView({behavior:'smooth'})}
 
-renderModuleFilter();filterItems();
+try{renderModuleFilter();filterItems()}catch(e){console.error('Init error:',e);document.getElementById('itemsGrid').innerHTML='<div class="empty"><p style="color:red">Error: '+e.message+'</p></div>'}
 </script>
 </body>
 </html>
