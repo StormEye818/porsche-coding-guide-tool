@@ -139,6 +139,14 @@ header p{color:var(--text2);font-size:14px}
   .item-info .name{font-size:13px}
   .step{grid-template-columns:28px 1fr}
 }
+
+/* 语言切换 */
+.lang-toggle{display:inline-flex;border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:12px}
+.lang-toggle button{padding:6px 16px;border:none;background:var(--card);color:var(--text2);font-size:12px;cursor:pointer;transition:all .2s}
+.lang-toggle button.active{background:var(--accent);color:#000;font-weight:600}
+header .lang-toggle{position:absolute;top:16px;right:16px}
+header{position:relative}
+
 /* 浮动操作栏（手机端） */
 .fab-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:10px 16px;z-index:100;gap:8px}
 .fab-bar .fab-count{flex:1;display:flex;align-items:center;font-size:13px;color:var(--text2)}
@@ -152,28 +160,29 @@ body.has-fab{padding-bottom:70px}
 <body>
 <div class="container">
   <header>
-    <h1>🏎️ 保时捷 X431 刷隐藏编码助手</h1>
-    <p>覆盖 981 / 718 / 991 / Macan · 多步骤项目一键展开 · 跨模块自动分组 · 中英双语</p>
+    <div class="lang-toggle" id="langToggle"><button class="active" onclick="setLang('zh')">中文</button><button onclick="setLang('en')">EN</button></div>
+    <h1 id="titleH1">🏎️ 保时捷 X431 刷隐藏编码助手</h1>
+    <p id="titleSub">覆盖 981 / 718 / 991 / Macan · 多步骤项目一键展开 · 跨模块自动分组 · 中英双语</p>
   </header>
   <div class="car-select">
-    <div class="group"><label>车型系列</label><select id="series" onchange="updateModels()"><option value="">请选择系列</option><option value="718">718 (Boxster/Cayman)</option><option value="981">981 (Boxster/Cayman)</option><option value="991.1">991.1 (Carrera/Turbo/GT3)</option><option value="991.2">991.2 (Carrera/Turbo/GT3)</option><option value="macan">Macan</option></select></div>
-    <div class="group"><label>具体型号</label><select id="model"><option value="">请先选择系列</option></select></div>
-    <div class="group"><label>年款</label><select id="year"><option value="">请选择年款</option></select></div>
+    <div class="group"><label id="lblSeries">车型系列</label><select id="series" onchange="updateModels()"><option value="" id="optSeries">请选择系列</option><option value="718">718 (Boxster/Cayman)</option><option value="981">981 (Boxster/Cayman)</option><option value="991.1">991.1 (Carrera/Turbo/GT3)</option><option value="991.2">991.2 (Carrera/Turbo/GT3)</option><option value="macan">Macan</option></select></div>
+    <div class="group"><label id="lblModel">具体型号</label><select id="model"><option value="" id="optModel">请先选择系列</option></select></div>
+    <div class="group"><label id="lblYear">年款</label><select id="year"><option value="" id="optYear">请选择年款</option></select></div>
   </div>
   <div class="module-filter" id="moduleFilter"></div>
-  <div class="search-box"><input type="text" id="searchInput" placeholder="搜索编码功能名称..." oninput="filterItems()"></div>
+  <div class="search-box"><input type="text" id="searchInput" placeholder="搜索编码功能名称..." id="searchPlaceholder" oninput="filterItems()"></div>
   <div class="actions-bar">
-    <div class="selected-count">已选择 <span id="selectedCount">0</span> 个项目</div>
+    <div class="selected-count" id="lblSelected">已选择 <span id="selectedCount">0</span> 个项目</div>
     <div class="btn-group">
-      <button class="btn btn-outline" onclick="selectAll()">全选当前筛选</button>
-      <button class="btn btn-outline" onclick="clearAll()">清空选择</button>
-      <button class="btn btn-primary" onclick="generateOutput()">📋 生成编码方案</button>
-      <button class="btn btn-outline" onclick="showTutorial()">📖 X431使用教程</button>
+      <button class="btn btn-outline" onclick="selectAll()" id="btnSelectAll">全选当前筛选</button>
+      <button class="btn btn-outline" onclick="clearAll()" id="btnClear">清空选择</button>
+      <button class="btn btn-primary" onclick="generateOutput()" id="btnGenerate">📋 生成编码方案</button>
+      <button class="btn btn-outline" onclick="showTutorial()" id="btnTutorial">📖 X431使用教程</button>
     </div>
   </div>
   <div class="items-grid" id="itemsGrid"></div>
   <div class="output-section" id="outputSection" style="display:none">
-    <h2>📋 编码方案 <span class="count" id="outputCount">0</span></h2>
+    <h2 id="lblOutput">📋 编码方案 <span class="count" id="outputCount">0</span></h2>
     <div id="outputContent"></div>
   </div>
 </div>
@@ -181,7 +190,7 @@ body.has-fab{padding-bottom:70px}
 <div class="fab-bar" id="fabBar">
   <div class="fab-count">已选 <span id="fabCount">0</span> 项</div>
   <button class="fab-tutorial" onclick="showTutorial()">📖</button>
-  <button class="fab-btn" onclick="generateOutput()">📋 生成编码方案</button>
+  <button class="fab-btn" onclick="generateOutput()" id="btnGenerate">📋 生成编码方案</button>
 </div>
 
 <div class="modal-overlay" id="tutorialModal">
@@ -474,14 +483,24 @@ const seriesModels={"718":["Boxster","Boxster S","Boxster GTS","Boxster T","Caym
 const seriesYears={"718":["2017","2018","2019","2020","2021","2022","2023","2024","2025"],"981":["2013","2014","2015","2016"],"991.1":["2012","2013","2014","2015","2016"],"991.2":["2017","2018","2019"],"macan":["2014","2015","2016","2017","2019","2020","2021","2022","2023","2024"]};
 const moduleColors={"组合仪表":"仪表","前端电子设备":"前端","后端电子设备":"后端","空调模块":"空调","DME模块":"DME","PSM模块":"PSM","转向助力":"转向","网关模块":"网关","座椅模块":"座椅","方向盘电子设备":"方向盘","前摄像头":"摄像头","头灯模块":"大灯","泊车辅助":"泊车","声浪模拟器":"声浪","跨模块":"跨模块"};
 let selectedIds=new Set();let activeModule="all";
-function updateModels(){const s=document.getElementById('series').value;const m=document.getElementById('model');const y=document.getElementById('year');m.innerHTML='<option value="">请选择型号</option>';y.innerHTML='<option value="">请选择年款</option>';if(s&&seriesModels[s]){seriesModels[s].forEach(v=>m.innerHTML+=`<option value="${v}">${v}</option>`);seriesYears[s].forEach(v=>y.innerHTML+=`<option value="${v}">${v}</option>`)}filterItems()}
+function updateModels(){const s=document.getElementById('series').value;const m=document.getElementById('model');const y=document.getElementById('year');m.innerHTML='<option value="">请选择型号</option>';y.innerHTML='<option value="" id="optYear">请选择年款</option>';if(s&&seriesModels[s]){seriesModels[s].forEach(v=>m.innerHTML+=`<option value="${v}">${v}</option>`);seriesYears[s].forEach(v=>y.innerHTML+=`<option value="${v}">${v}</option>`)}filterItems()}
 function getModules(){const mods=new Set();ITEMS.forEach(i=>mods.add(i.module));return[...mods]}
 function renderModuleFilter(){const el=document.getElementById('moduleFilter');el.innerHTML='<button class="module-btn active" onclick="setModule(\'all\')">全部</button>';getModules().forEach(m=>{el.innerHTML+=`<button class="module-btn" onclick="setModule('${m}')">${m}</button>`})}
 function setModule(m){activeModule=m;document.querySelectorAll('.module-btn').forEach(b=>{b.classList.toggle('active',(m==='all'&&b.textContent==='全部')||b.textContent===m)});filterItems()}
 function filterItems(){const series=document.getElementById('series').value;const search=document.getElementById('searchInput').value.toLowerCase();const grid=document.getElementById('itemsGrid');grid.innerHTML='';const filtered=ITEMS.filter(item=>{if(activeModule!=='all'&&item.module!==activeModule)return false;if(search&&!item.name.toLowerCase().includes(search)&&!item.nameEn.toLowerCase().includes(search)&&!item.module.includes(search))return false;if(series&&!item.compat.includes(series))return false;return true});if(filtered.length===0){grid.innerHTML='<div class="empty"><div class="icon">🔍</div><p>没有匹配的编码项，请调整筛选条件</p></div>';return}
-filtered.forEach(item=>{const tag=moduleColors[item.module]||item.module;const checked=selectedIds.has(item.id)?'checked':'';const selClass=selectedIds.has(item.id)?'selected':'';let badges='';if(item.compatStatus==='ok')badges+='<span class="badge badge-ok">已验证</span>';else if(item.compatStatus==='hw')badges+='<span class="badge badge-hw">需硬件</span>';if(item.multiModule)badges+='<span class="badge badge-multi">跨模块</span>';const stepCount=item.steps.length>1?`<span class="steps-count">${item.steps.length}步</span>`:'';grid.innerHTML+=`<div class="item-card ${selClass}" onclick="toggleItem(${item.id},this)"><input type="checkbox" ${checked} onclick="event.stopPropagation();toggleItem(${item.id},this.parentElement)"><div class="item-info"><div class="name">${item.name}${stepCount}</div><span class="module-tag tag-${tag}">${item.module}</span>${badges}<div class="compat">${item.compat.join(' / ')}${item.note?' · '+item.note:''}</div></div></div>`});updateCount()}
+filtered.forEach(item=>{const tag=moduleColors[item.module]||item.module;const checked=selectedIds.has(item.id)?'checked':'';const selClass=selectedIds.has(item.id)?'selected':'';let badges='';if(item.compatStatus==='ok')badges+='<span class="badge badge-ok">已验证</span>';else if(item.compatStatus==='hw')badges+='<span class="badge badge-hw">需硬件</span>';if(item.multiModule)badges+='<span class="badge badge-multi">跨模块</span>';const stepCount=item.steps.length>1?`<span class="steps-count">${item.steps.length}步</span>`:'';const displayName = lang==='en' ? (item.nameEn||item.name) : item.name;
+  const displayModule = lang==='en' ? (moduleNamesEn[item.module]||item.module) : item.module;
+  const okLabel = lang==='en' ? 'Verified' : '已验证';
+  const hwLabel = lang==='en' ? 'Needs HW' : '需硬件';
+  const multiLabel = lang==='en' ? 'Cross-Module' : '跨模块';
+  let badges2='';
+  if(item.compatStatus==='ok')badges2+=`<span class="badge badge-ok">${okLabel}</span>`;
+  else if(item.compatStatus==='hw')badges2+=`<span class="badge badge-hw">${hwLabel}</span>`;
+  if(item.multiModule)badges2+=`<span class="badge badge-multi">${multiLabel}</span>`;
+  grid.innerHTML+=`<div class="item-card ${selClass}" onclick="toggleItem(${item.id},this)"><input type="checkbox" ${checked} onclick="event.stopPropagation();toggleItem(${item.id},this.parentElement)"><div class="item-info"><div class="name">${displayName}${stepCount}</div><span class="module-tag tag-${tag}">${displayModule}</span>${badges2}<div class="compat">${item.compat.join(' / ')}${item.note?' · '+item.note:''}</div></div></div>`});updateCount()}
 function toggleItem(id,el){if(selectedIds.has(id))selectedIds.delete(id);else selectedIds.add(id);const cb=el.querySelector('input[type=checkbox]');if(cb)cb.checked=selectedIds.has(id);el.classList.toggle('selected',selectedIds.has(id));updateCount()}
-function updateCount(){document.getElementById('selectedCount').textContent=selectedIds.size;const fab=document.getElementById('fabCount');if(fab)fab.textContent=selectedIds.size;document.body.classList.toggle('has-fab',selectedIds.size>0)}
+function updateCount(){document.getElementById('selectedCount').textContent=t('selected')+' '+selectedIds.size+' '+t('items');
+  const fab=document.getElementById('fabCount');if(fab)fab.textContent=selectedIds.size;const fab=document.getElementById('fabCount');if(fab)fab.textContent=selectedIds.size;document.body.classList.toggle('has-fab',selectedIds.size>0)}
 function selectAll(){const series=document.getElementById('series').value;const search=document.getElementById('searchInput').value.toLowerCase();ITEMS.filter(item=>{if(activeModule!=='all'&&item.module!==activeModule)return false;if(search&&!item.name.toLowerCase().includes(search)&&!item.nameEn.toLowerCase().includes(search))return false;if(series&&!item.compat.includes(series))return false;return true}).forEach(i=>selectedIds.add(i.id));filterItems()}
 function clearAll(){selectedIds.clear();filterItems()}
 function generateOutput(){if(selectedIds.size===0){alert('请先选择至少一项编码');return}
@@ -497,18 +516,74 @@ function renderSteps(steps,series,startIdx){
   filtered.forEach(step=>{
     const mTag=moduleColors[step.module]||'跨模块';
     if(step.module&&step.module!==lastModule){h+=`<div style="margin:8px 0 4px;font-size:11px;color:var(--accent);font-weight:600;border-bottom:1px solid var(--border);padding-bottom:4px">📂 ${step.module}</div>`;lastModule=step.module}
-    h+=`<div class="step"><div class="step-num">${startIdx+idx+1}</div><div class="step-detail"><div class="path-zh">🇨🇳 ${step.pathZh}</div><div class="path-en">🇬🇧 ${step.pathEn}</div><div class="val"><span class="from">${step.from}</span><span class="arrow">→</span><span class="to">${step.to}</span></div></div></div>`;idx++});
+    h+=`<div class="step"><div class="step-num">${startIdx+idx+1}</div><div class="step-detail">${lang==='zh'?`<div class="path-zh">🇨🇳 ${step.pathZh}</div><div class="path-en">🇬🇧 ${step.pathEn}</div>`:`<div class="path-en" style="color:var(--text);font-size:13px">🇬🇧 ${step.pathEn}</div>`}<div class="val"><span class="from">${step.from}</span><span class="arrow">→</span><span class="to">${step.to}</span></div></div></div>`;idx++});
   return h}
 // Group by module
 const groups={};selected.forEach(item=>{if(item.multiModule){const key="跨模块："+item.name;if(!groups[key])groups[key]={multi:true,item:item};}else{if(!groups[item.module])groups[item.module]={multi:false,items:[]};groups[item.module].items.push(item)}});
 let totalSteps=0;selected.forEach(i=>{totalSteps+=filterSteps(i.steps,series).length});
-let html=`<div style="margin-bottom:16px;padding:12px;background:var(--border);border-radius:8px;font-size:13px">🚗 <b>车型</b>：${carInfo} &nbsp;|&nbsp; 📋 <b>共 ${selected.length} 个项目 · ${totalSteps} 个编码步骤</b> &nbsp;|&nbsp; 涉及 ${Object.keys(groups).length} 个模块/项目</div>`;
+const carLabel=lang==='zh'?'车型':'Car';const stepLabel=lang==='zh'?'编码步骤':'coding steps';const projLabel=lang==='zh'?'个项目':'projects';const modLabel=lang==='zh'?'个模块/项目':'modules';let html=`<div style="margin-bottom:16px;padding:12px;background:var(--border);border-radius:8px;font-size:13px">🚗 <b>${carLabel}</b>：${carInfo} &nbsp;|&nbsp; 📋 <b>${selected.length}${projLabel} · ${totalSteps}${stepLabel}</b> &nbsp;|&nbsp; ${Object.keys(groups).length}${modLabel}</div>`;
 for(const[key,g]of Object.entries(groups)){
-if(g.multi){const item=g.item;const filtered=filterSteps(item.steps,series);html+=`<div class="module-group"><h3><span class="module-tag tag-跨模块">跨模块</span> ${item.name} <span style="color:var(--text2);font-size:12px">${item.nameEn}</span> <span style="color:var(--text2);font-size:11px">${filtered.length}步</span></h3><div class="steps">${renderSteps(item.steps,series,0)}</div>`;if(item.note)html+=`<div style="padding:8px 16px;font-size:12px;color:var(--accent)">⚠️ ${item.note}</div>`;html+='</div>'}
-else{let allSteps=[];g.items.forEach(item=>{allSteps=allSteps.concat(filterSteps(item.steps,series))});html+=`<div class="module-group"><h3><span class="module-tag tag-${moduleColors[key]||key}">${key}</span> ${g.items.length}个项目 · ${allSteps.length}步</h3><div class="steps">`;g.items.forEach(item=>{const filtered=filterSteps(item.steps,series);html+=`<div class="project-block"><div class="project-title">${item.name} <span class="en">${item.nameEn}</span> <span style="font-size:11px;color:var(--text2)">${filtered.length}步</span></div>${renderSteps(item.steps,series,0)}</div>`});html+='</div></div>'}}
-html+=`<div style="margin-top:16px;padding:12px;background:#e8a83811;border:1px solid var(--accent);border-radius:8px;font-size:12px">⚠️ <b>操作提醒</b>：编码前截图/记录所有原值 · 一次只改一项 · 改完验证再改下一项 · 编码中不要关闭电源</div>`;document.getElementById('outputContent').innerHTML=html;document.getElementById('outputCount').textContent=selected.length;document.getElementById('outputSection').style.display='block';document.getElementById('outputSection').scrollIntoView({behavior:'smooth'})}
+if(g.multi){const item=g.item;const filtered=filterSteps(item.steps,series);html+=`<div class="module-group"><h3><span class="module-tag tag-跨模块">${lang==='zh'?'跨模块':'Cross-Module'}</span> ${lang==='en'?item.nameEn:item.name} <span style="color:var(--text2);font-size:12px">${lang==='zh'?item.nameEn:item.name}</span> <span style="color:var(--text2);font-size:11px">${filtered.length}${lang==='zh'?'步':'steps'}</span></h3><div class="steps">${renderSteps(item.steps,series,0)}</div>`;if(item.note)html+=`<div style="padding:8px 16px;font-size:12px;color:var(--accent)">⚠️ ${item.note}</div>`;html+='</div>'}
+else{let allSteps=[];g.items.forEach(item=>{allSteps=allSteps.concat(filterSteps(item.steps,series))});html+=`<div class="module-group"><h3><span class="module-tag tag-${moduleColors[key]||key}">${lang==='en'?(moduleNamesEn[key]||key):key}</span> ${g.items.length}${lang==='zh'?'个项目':'projects'} · ${allSteps.length}${lang==='zh'?'步':'steps'}</h3><div class="steps">`;g.items.forEach(item=>{const filtered=filterSteps(item.steps,series);html+=`<div class="project-block"><div class="project-title">${lang==='en'?item.nameEn:item.name} <span class="en">${lang==='zh'?item.nameEn:''}</span> <span style="font-size:11px;color:var(--text2)">${filtered.length}${lang==='zh'?'步':'steps'}</span></div>${renderSteps(item.steps,series,0)}</div>`});html+='</div></div>'}}
+html+=`<div style="margin-top:16px;padding:12px;background:#e8a83811;border:1px solid var(--accent);border-radius:8px;font-size:12px">${t('warn')}</div>`;document.getElementById('outputContent').innerHTML=html;document.getElementById('outputCount').textContent=selected.length;document.getElementById('outputSection').style.display='block';document.getElementById('outputSection').scrollIntoView({behavior:'smooth'})}
 function showTutorial(){document.getElementById('tutorialModal').classList.add('show')}
 function closeTutorial(){document.getElementById('tutorialModal').classList.remove('show')}
+
+// ==================== 语言系统 ====================
+let lang = 'zh';
+const T = {
+  zh: {
+    title: '🏎️ 保时捷 X431 刷隐藏编码助手',
+    sub: '覆盖 981 / 718 / 991 / Macan · 多步骤项目一键展开 · 跨模块自动分组 · 中英双语',
+    series: '车型系列', model: '具体型号', year: '年款',
+    optSeries: '请选择系列', optModel: '请先选择系列', optYear: '请选择年款',
+    search: '搜索编码功能名称...',
+    selected: '已选择', items: '个项目',
+    selectAll: '全选当前筛选', clear: '清空选择',
+    generate: '📋 生成编码方案', tutorial: '📖 X431使用教程',
+    output: '📋 编码方案', multi: '跨模块',
+    ok: '已验证', hw: '需硬件', multiLabel: '跨模块',
+    steps: '步', projects: '个项目', modules: '个模块/项目',
+    noMatch: '没有匹配的编码项，请调整筛选条件',
+    alert: '请先选择至少一项编码',
+    warn: '⚠️ 操作提醒：编码前截图/记录所有原值 · 一次只改一项 · 改完验证再改下一项 · 编码中不要关闭电源',
+    fabSelected: '已选', fabItems: '项',
+  },
+  en: {
+    title: '🏎️ Porsche X431 Coding Assistant',
+    sub: '981 / 718 / 991 / Macan · Multi-step projects · Cross-module grouping · Bilingual',
+    series: 'Series', model: 'Model', year: 'Year',
+    optSeries: 'Select Series', optModel: 'Select Series first', optYear: 'Select Year',
+    search: 'Search coding items...',
+    selected: 'Selected', items: 'items',
+    selectAll: 'Select All', clear: 'Clear All',
+    generate: '📋 Generate Plan', tutorial: '📖 X431 Tutorial',
+    output: '📋 Coding Plan', multi: 'Cross-Module',
+    ok: 'Verified', hw: 'Needs HW', multiLabel: 'Cross-Module',
+    steps: 'steps', projects: 'projects', modules: 'modules',
+    noMatch: 'No matching items. Adjust filters.',
+    alert: 'Please select at least one item',
+    warn: '⚠️ Reminder: Backup original values · One change at a time · Verify before next change · Don't power off during coding',
+    fabSelected: 'Selected', fabItems: '',
+  }
+};
+const moduleNamesEn = {"组合仪表":"Instrument Cluster","前端电子设备":"Front-End Electronics","后端电子设备":"Rear-End Electronics","空调模块":"Air Conditioning","DME模块":"DME","PSM模块":"PSM","转向助力":"EPS","网关模块":"Gateway","座椅模块":"Seat Memory","方向盘电子设备":"Steering Wheel","前摄像头":"Front Camera","头灯模块":"Headlight","泊车辅助":"Park Assist","声浪模拟器":"Sound Symposer","跨模块":"Cross-Module"};
+function t(key){return T[lang][key]||key}
+function setLang(l){
+  lang=l;
+  document.querySelectorAll('.lang-toggle button').forEach(b=>{b.classList.toggle('active',b.textContent===(l==='zh'?'中文':'EN'))});
+  document.getElementById('titleH1').textContent=t('title');
+  document.getElementById('titleSub').textContent=t('sub');
+  document.getElementById('lblSeries').textContent=t('series');
+  document.getElementById('lblModel').textContent=t('model');
+  document.getElementById('lblYear').textContent=t('year');
+  document.getElementById('optSeries').textContent=t('optSeries');
+  document.getElementById('optModel').textContent=t('optModel');
+  document.getElementById('optYear').textContent=t('optYear');
+  document.getElementById('searchPlaceholder').placeholder=t('search');
+  filterItems();
+}
+
 renderModuleFilter();filterItems();
 </script>
 </body>
