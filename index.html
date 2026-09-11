@@ -545,21 +545,21 @@ function renderSteps(steps,series,startIdx){
   const filtered=sortStepsByModule(filterSteps(steps,series));
   let h='';let lastModule='';let idx=0;
   filtered.forEach(step=>{
-    const mTag=moduleColors[step.module]||'跨模块';
+    const mTag=moduleColors[step.module]||'仪表';
     if(step.module&&step.module!==lastModule){h+=`<div style="margin:8px 0 4px;font-size:11px;color:var(--accent);font-weight:600;border-bottom:1px solid var(--border);padding-bottom:4px">📂 ${mn(step.module)}</div>`;lastModule=step.module}
     h+=`<div class="step"><div class="step-num">${startIdx+idx+1}</div><div class="step-detail">${lang==='zh'?`<div class="path-zh">🇨🇳 ${step.pathZh}</div><div class="path-en">🇬🇧 ${step.pathEn}</div>`:`<div class="path-en" style="color:var(--text);font-size:13px">🇬🇧 ${step.pathEn}</div>`}<div class="val"><span class="from">${step.from}</span><span class="arrow">→</span><span class="to">${step.to}</span></div></div></div>`;idx++});
   return h}
 // Group by module
-const groups={};selected.forEach(item=>{if(item.multiModule){const key=tk('ml')+'：'+dn(item);if(!groups[key])groups[key]={multi:true,item:item};}else{if(!groups[item.module])groups[item.module]={multi:false,items:[]};groups[item.module].items.push(item)}});
+const groups={};selected.forEach(item=>{if(item.multiModule){const key=item.module+'：'+item.name;if(!groups[key])groups[key]={multi:true,item:item};}else{if(!groups[item.module])groups[item.module]={multi:false,items:[]};groups[item.module].items.push(item)}});
 let totalSteps=0;selected.forEach(i=>{totalSteps+=filterSteps(i.steps,series).length});
 let html=`<div style="margin-bottom:16px;padding:12px;background:var(--border);border-radius:8px;font-size:13px">🚗 <b>${tk('car')}</b>：${carInfo} &nbsp;|&nbsp; 📋 <b>${selected.length}${tk('projs')} · ${totalSteps}${tk('steps')}</b> &nbsp;|&nbsp; ${Object.keys(groups).length}${tk('mods')}</div>`;
 for(const[key,g]of Object.entries(groups)){
 if(g.multi){const item=g.item;const filtered=filterSteps(item.steps,series);html+=`<div class="module-group"><h3><span class="module-tag tag-跨模块">${tk('ml')}</span> ${dn(item)} <span style="color:var(--text2);font-size:12px">${lang==='zh'?item.nameEn:item.name}</span> <span style="color:var(--text2);font-size:11px">${filtered.length}${tk('steps')}</span></h3><div class="steps">${renderSteps(item.steps,series,0)}</div>`;if(item.note)html+=`<div style="padding:8px 16px;font-size:12px;color:var(--accent)">⚠️ ${item.note}</div>`;html+='</div>'}
-else{let allSteps=[];g.items.forEach(item=>{allSteps=allSteps.concat(filterSteps(item.steps,series))});html+=`<div class="module-group"><h3><span class="module-tag tag-${moduleColors[key]||key}">${key}</span> ${g.items.length}${tk('projs')} · ${allSteps.length}${tk('steps')}</h3><div class="steps">`;g.items.forEach(item=>{const filtered=filterSteps(item.steps,series);html+=`<div class="project-block"><div class="project-title">${dn(item)} <span class="en">${lang==='zh'?item.nameEn:''}</span> <span style="font-size:11px;color:var(--text2)">${filtered.length}${tk('steps')}</span></div>${renderSteps(item.steps,series,0)}</div>`});html+='</div></div>'}}
+else{let allSteps=[];g.items.forEach(item=>{allSteps=allSteps.concat(filterSteps(item.steps,series))});html+=`<div class="module-group"><h3><span class="module-tag tag-${moduleColors[key]||key}">${mn(key)}</span> ${g.items.length}${tk('projs')} · ${allSteps.length}${tk('steps')}</h3><div class="steps">`;g.items.forEach(item=>{const filtered=filterSteps(item.steps,series);html+=`<div class="project-block"><div class="project-title">${dn(item)} <span class="en">${lang==='zh'?item.nameEn:''}</span> <span style="font-size:11px;color:var(--text2)">${filtered.length}${tk('steps')}</span></div>${renderSteps(item.steps,series,0)}</div>`});html+='</div></div>'}}
 html+=`<div style="margin-top:16px;padding:12px;background:#e8a83811;border:1px solid var(--accent);border-radius:8px;font-size:12px">${tk('warn')}</div>`;document.getElementById('outputContent').innerHTML=html;document.getElementById('outputCount').textContent=selected.length;document.getElementById('outputSection').style.display='block';document.getElementById('outputSection').scrollIntoView({behavior:'smooth'})}
 function showTutorial(){document.getElementById('tutorialModal').classList.add('show')}
 function closeTutorial(){document.getElementById('tutorialModal').classList.remove('show')}
-renderModuleFilter();filterItems();
+renderModuleFilter();filterItems();updateTutorialContent('zh');
 </script>
 </body>
 </html>
