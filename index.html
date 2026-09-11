@@ -170,15 +170,15 @@ header{position:relative}
   <div class="actions-bar">
     <div class="selected-count" id="lblSelected">已选择 <span id="selectedCount">0</span> 个项目</div>
     <div class="btn-group">
-      <button class="btn btn-outline" onclick="selectAll()">全选当前筛选</button>
-      <button class="btn btn-outline" onclick="clearAll()">清空选择</button>
-      <button class="btn btn-primary" onclick="generateOutput()">📋 生成编码方案</button>
-      <button class="btn btn-outline" onclick="showTutorial()">📖 X431使用教程</button>
+      <button class="btn btn-outline" onclick="selectAll()" id="btnSA">全选当前筛选</button>
+      <button class="btn btn-outline" onclick="clearAll()" id="btnCL">清空选择</button>
+      <button class="btn btn-primary" onclick="generateOutput()" id="btnGen">📋 生成编码方案</button>
+      <button class="btn btn-outline" onclick="showTutorial()" id="btnTut">📖 X431使用教程</button>
     </div>
   </div>
   <div class="items-grid" id="itemsGrid"></div>
   <div class="output-section" id="outputSection" style="display:none">
-    <h2>📋 编码方案 <span class="count" id="outputCount">0</span></h2>
+    <h2 id="lblOutput">📋 编码方案 <span class="count" id="outputCount">0</span></h2>
     <div id="outputContent"></div>
   </div>
 </div>
@@ -186,23 +186,13 @@ header{position:relative}
 <div class="fab-bar" id="fabBar">
   <div class="fab-count">已选 <span id="fabCount">0</span> 项</div>
   <button class="fab-tutorial" onclick="showTutorial()">📖</button>
-  <button class="fab-btn" onclick="generateOutput()">📋 生成编码方案</button>
+  <button class="fab-btn" onclick="generateOutput()" id="fabGen">📋 生成编码方案</button>
 </div>
 
 <div class="modal-overlay" id="tutorialModal">
   <div class="modal">
     <button class="close-btn" onclick="closeTutorial()">×</button>
-    <h2>📖 X431 使用教程</h2>
-    <h3>一、准备工作</h3>
-    <ol><li>将 X431 插入 OBD2 接口（驾驶员侧仪表板下方）</li><li>钥匙转到 ACC 模式（通电不启动）</li><li><b>关闭所有不必要电器</b>：关门、关空调、关大灯、关 PCM</li><li>MFD 显示电池电压监控</li></ol>
-    <h3>二、Launch CRP919x / E 操作流程</h3>
-    <ol><li>返回箭头 → 主界面 → <b>诊断(Diagnose)</b></li><li>向下滚动 → <b>保时捷(Porsche)</b> → 确定</li><li><b>自动搜索(Automatically Search)</b> → 识别车型 → 确定</li><li><b>系统选择(System Selection)</b></li><li>选择对应的<b>系统模块</b>（如：前端电子设备、组合仪表、空调等）</li><li><b>编码/刷隐藏(Code/Brush Hiding)</b></li><li><b>刷隐藏/修改(Brush Hidden/Modified)</b>（支持搜索）</li><li>找到编码项 → 修改值 → <b>写入编码(Write Code)</b></li></ol>
-    <h3>三、Thinkdiag 操作流程</h3>
-    <ol><li>安装 Thinkdiag App（仅安卓支持编码）</li><li>插入 OBD2 → 蓝牙配对</li><li><b>全系统诊断(All Systems Diagnostic)</b> → <b>保时捷</b></li><li><b>自动搜索</b> → 确定 → <b>系统选择</b></li><li>选模块 → <b>编码/刷隐藏</b> → <b>刷隐藏/修改</b></li><li>找到编码项 → 修改 → <b>写入编码(Write Code)</b></li></ol>
-    <h3>四、设备选购</h3>
-    <ul><li><b>Launch CRP919x/E</b>：~$400，到期仍可编码</li><li><b>Thinkdiag</b>：~$100，需安卓，年费~$40</li><li>⚠️ 必须支持 <b>Ecu Coding</b>，Lite版不行</li></ul>
-    <h3>五、注意事项</h3>
-    <div class="tip">⚠️ <b>每次只改一项</b>，改完验证再改下一项<br>⚠️ <b>改前截图/记录原值</b><br>⚠️ 编码中不要关电源<br>⚠️ 写入报错可能是顺序或兼容性问题<br>⚠️ 安全模块(Airbag/PSM)谨慎操作</div>
+    <div id="tutorialContent"></div>
   </div>
 </div>
 <script>
@@ -486,8 +476,55 @@ const MNE={"组合仪表":"Instrument Cluster","前端电子设备":"Front-End E
 function tk(k){return _T[lang][k]||k}
 function mn(m){return lang==='en'?(MNE[m]||m):m}
 function dn(item){return lang==='en'?(item.nameEn||item.name):item.name}
-function setLang(l){lang=l;document.querySelectorAll('.lang-toggle button').forEach(b=>{b.classList.toggle('active',b.textContent===(l==='zh'?'中文':'EN'))});document.getElementById('titleH1').textContent=l==='zh'?'🏎️ 保时捷 X431 刷隐藏编码助手':'🏎️ Porsche X431 Coding Assistant';document.getElementById('titleSub').textContent=l==='zh'?'覆盖 981 / 718 / 991 / Macan · 多步骤项目一键展开 · 跨模块自动分组 · 中英双语':'981 / 718 / 991 / Macan · Multi-step · Cross-module · Bilingual';document.getElementById('lblSeries').textContent=l==='zh'?'车型系列':'Series';document.getElementById('lblModel').textContent=l==='zh'?'具体型号':'Model';document.getElementById('lblYear').textContent=l==='zh'?'年款':'Year';document.getElementById('optSeries').textContent=l==='zh'?'请选择系列':'Select Series';document.getElementById('optModel').textContent=l==='zh'?'请先选择系列':'Select Series first';document.getElementById('optYear').textContent=l==='zh'?'请选择年款':'Select Year';document.getElementById('searchInput').placeholder=l==='zh'?'搜索编码功能名称...':'Search coding items...';renderModuleFilter();filterItems()}
-function updateModels(){const s=document.getElementById('series').value;const m=document.getElementById('model');const y=document.getElementById('year');m.innerHTML='<option value="">请选择型号</option>';y.innerHTML='<option value="">请选择年款</option>';if(s&&seriesModels[s]){seriesModels[s].forEach(v=>m.innerHTML+=`<option value="${v}">${v}</option>`);seriesYears[s].forEach(v=>y.innerHTML+=`<option value="${v}">${v}</option>`)}filterItems()}
+function setLang(l){lang=l;document.querySelectorAll('.lang-toggle button').forEach(b=>{b.classList.toggle('active',b.textContent===(l==='zh'?'中文':'EN'))});
+const is=l==='zh';
+document.getElementById('titleH1').textContent=is?'🏎️ 保时捷 X431 刷隐藏编码助手':'🏎️ Porsche X431 Coding Assistant';
+document.getElementById('titleSub').textContent=is?'覆盖 981 / 718 / 991 / Macan · 多步骤项目一键展开 · 跨模块自动分组 · 中英双语':'981 / 718 / 991 / Macan · Multi-step · Cross-module · Bilingual';
+document.getElementById('lblSeries').textContent=is?'车型系列':'Series';
+document.getElementById('lblModel').textContent=is?'具体型号':'Model';
+document.getElementById('lblYear').textContent=is?'年款':'Year';
+document.getElementById('optSeries').textContent=is?'请选择系列':'Select Series';
+document.getElementById('optModel').textContent=is?'请先选择系列':'Select Series first';
+document.getElementById('optYear').textContent=is?'请选择年款':'Select Year';
+document.getElementById('searchInput').placeholder=is?'搜索编码功能名称...':'Search coding items...';
+document.getElementById('btnSA').textContent=is?'全选当前筛选':'Select All';
+document.getElementById('btnCL').textContent=is?'清空选择':'Clear All';
+document.getElementById('btnGen').textContent=is?'📋 生成编码方案':'📋 Generate Plan';
+document.getElementById('btnTut').textContent=is?'📖 X431使用教程':'📖 X431 Tutorial';
+document.getElementById('lblOutput').innerHTML=is?'📋 编码方案 <span class="count" id="outputCount">0</span>':'📋 Coding Plan <span class="count" id="outputCount">0</span>';
+document.getElementById('fabGen').textContent=is?'📋 生成编码方案':'📋 Generate Plan';
+document.getElementById('fabBar').querySelector('.fab-count').innerHTML=is?`已选 <span id="fabCount">${selectedIds.size}</span> 项`:`<span id="fabCount">${selectedIds.size}</span> selected`;
+updateModels();renderModuleFilter();filterItems();
+updateTutorialContent(l)}
+function updateTutorialContent(l){
+const is=l==='zh';
+const el=document.getElementById('tutorialContent');
+el.innerHTML=is?
+`<h2>📖 X431 使用教程</h2>
+<h3>一、准备工作</h3>
+<ol><li>将 X431 插入 OBD2 接口（驾驶员侧仪表板下方）</li><li>钥匙转到 ACC 模式（通电不启动）</li><li><b>关闭所有不必要电器</b>：关门、关空调、关大灯、关 PCM</li><li>MFD 显示电池电压监控</li></ol>
+<h3>二、Launch CRP919x / E 操作流程</h3>
+<ol><li>返回箭头 → 主界面 → <b>诊断</b></li><li>向下滚动 → <b>保时捷</b> → 确定</li><li><b>自动搜索</b> → 识别车型 → 确定</li><li><b>系统选择</b></li><li>选择对应的<b>系统模块</b></li><li><b>编码/刷隐藏</b></li><li><b>刷隐藏/修改</b>（支持搜索）</li><li>找到编码项 → 修改值 → <b>写入编码</b></li></ol>
+<h3>三、Thinkdiag 操作流程</h3>
+<ol><li>安装 Thinkdiag App（仅安卓支持编码）</li><li>插入 OBD2 → 蓝牙配对</li><li><b>全系统诊断</b> → <b>保时捷</b></li><li><b>自动搜索</b> → 确定 → <b>系统选择</b></li><li>选模块 → <b>编码/刷隐藏</b> → <b>刷隐藏/修改</b></li><li>找到编码项 → 修改 → <b>写入编码</b></li></ol>
+<h3>四、设备选购</h3>
+<ul><li><b>Launch CRP919x/E</b>：~$400，到期仍可编码</li><li><b>Thinkdiag</b>：~$100，需安卓，年费~$40</li><li>⚠️ 必须支持 <b>Ecu Coding</b>，Lite版不行</li></ul>
+<h3>五、注意事项</h3>
+<div class="tip">⚠️ <b>每次只改一项</b>，改完验证再改下一项<br>⚠️ <b>改前截图/记录原值</b><br>⚠️ 编码中不要关电源<br>⚠️ 写入报错可能是顺序或兼容性问题<br>⚠️ 安全模块(Airbag/PSM)谨慎操作</div>`
+:
+`<h2>📖 X431 Tutorial</h2>
+<h3>1. Preparation</h3>
+<ol><li>Plug X431 into OBD2 port (under driver-side dashboard)</li><li>Turn key to ACC mode (ignition on, engine off)</li><li><b>Turn off all non-essential electronics</b>: close doors, turn off HVAC, headlights, PCM screen</li><li>Set MFD to display battery voltage for monitoring</li></ol>
+<h3>2. Launch CRP919x / E Workflow</h3>
+<ol><li>Back arrow → Main menu → <b>Diagnose</b></li><li>Scroll down → <b>Porsche</b> → OK</li><li><b>Automatically Search</b> → Detects car model → OK</li><li><b>System Selection</b></li><li>Select the target <b>ECU module</b></li><li><b>Code/Brush Hiding</b></li><li><b>Brush Hidden/Modified</b> (supports search)</li><li>Find coding item → Change value → <b>Write Code</b></li></ol>
+<h3>3. Thinkdiag Workflow</h3>
+<ol><li>Install Thinkdiag App (Android only for coding)</li><li>Plug into OBD2 → Bluetooth pair</li><li><b>All Systems Diagnostic</b> → <b>Porsche</b></li><li><b>Automatically Search</b> → OK → <b>System Selection</b></li><li>Select module → <b>Code/Brush Hiding</b> → <b>Brush Hidden/Modified</b></li><li>Find item → Modify → <b>Write Code</b></li></ol>
+<h3>4. Device Recommendations</h3>
+<ul><li><b>Launch CRP919x/E</b>: ~$400, still works after subscription expires</li><li><b>Thinkdiag</b>: ~$100, Android only, ~$40/year renewal</li><li>⚠️ Must support <b>Ecu Coding</b> — Lite versions do NOT</li></ul>
+<h3>5. Important Notes</h3>
+<div class="tip">⚠️ <b>One change at a time</b> — verify before next change<br>⚠️ <b>Backup original values</b> (screenshots)<br>⚠️ Don\'t power off during coding<br>⚠️ Write errors may indicate wrong order or incompatibility<br>⚠️ Safety modules (Airbag/PSM) — proceed with caution</div>`;
+}
+function updateModels(){const s=document.getElementById('series').value;const m=document.getElementById('model');const y=document.getElementById('year');const mi=lang==='zh'?'请选择型号':'Select Model';const yi=lang==='zh'?'请选择年款':'Select Year';m.innerHTML=`<option value="">${mi}</option>`;y.innerHTML=`<option value="">${yi}</option>`;if(s&&seriesModels[s]){seriesModels[s].forEach(v=>m.innerHTML+=`<option value="${v}">${v}</option>`);seriesYears[s].forEach(v=>y.innerHTML+=`<option value="${v}">${v}</option>`)}filterItems()}
 function getModules(){const mods=new Set();ITEMS.forEach(i=>mods.add(i.module));return[...mods]}
 function renderModuleFilter(){const el=document.getElementById('moduleFilter');el.innerHTML=`<button class="module-btn active" onclick="setModule('all')">${tk('all')}</button>`;getModules().forEach(m=>{el.innerHTML+=`<button class="module-btn" onclick="setModule('${m}')">${mn(m)}</button>`})}
 function setModule(m){activeModule=m;document.querySelectorAll('.module-btn').forEach(b=>{const al=tk('all');const ml=mn(m);b.classList.toggle('active',(m==='all'&&b.textContent===al)||b.textContent===ml)});filterItems()}
@@ -498,7 +535,7 @@ function updateCount(){document.getElementById('selectedCount').textContent=sele
 function selectAll(){const series=document.getElementById('series').value;const search=document.getElementById('searchInput').value.toLowerCase();ITEMS.filter(item=>{if(activeModule!=='all'&&item.module!==activeModule)return false;if(search&&!item.name.toLowerCase().includes(search)&&!item.nameEn.toLowerCase().includes(search))return false;if(series&&!item.compat.includes(series))return false;return true}).forEach(i=>selectedIds.add(i.id));filterItems()}
 function clearAll(){selectedIds.clear();filterItems()}
 function generateOutput(){if(selectedIds.size===0){alert(tk('alert'));return}
-const series=document.getElementById('series').value;const model=document.getElementById('model').value;const year=document.getElementById('year').value;const carInfo=[year,series,model].filter(Boolean).join(' ')||'未选择车型';const selected=ITEMS.filter(i=>selectedIds.has(i.id));
+const series=document.getElementById('series').value;const model=document.getElementById('model').value;const year=document.getElementById('year').value;const carInfo=[year,series,model].filter(Boolean).join(' ')||(lang==='zh'?'未选择车型':'No car selected');const selected=ITEMS.filter(i=>selectedIds.has(i.id));
 // Filter steps by car series: if step has compat, only show when series matches; if no compat, always show
 function filterSteps(steps,series){if(!series)return steps;return steps.filter(s=>!s.compat||s.compat.includes(series))}
 // Sort steps by module so same-module steps are grouped together, preserving original order within each module
