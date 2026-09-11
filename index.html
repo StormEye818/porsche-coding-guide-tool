@@ -166,7 +166,7 @@ header{position:relative}
     <div class="group"><label id="lblYear">年款</label><select id="year"><option value="" id="optYear">请选择年款</option></select></div>
   </div>
   <div class="module-filter" id="moduleFilter"></div>
-  <div class="search-box"><input type="text" id="searchInput" placeholder="搜索编码功能名称..." id="searchPlaceholder" oninput="filterItems()"></div>
+  <div class="search-box"><input type="text" id="searchInput" placeholder="搜索编码功能名称..." oninput="filterItems()"></div>
   <div class="actions-bar">
     <div class="selected-count">已选择 <span id="selectedCount">0</span> 个项目</div>
     <div class="btn-group">
@@ -519,7 +519,11 @@ let lang='zh';
 const T={zh:{title:'🏎️ 保时捷 X431 刷隐藏编码助手',sub:'覆盖 981 / 718 / 991 / Macan · 多步骤项目一键展开 · 跨模块自动分组 · 中英双语',series:'车型系列',model:'具体型号',year:'年款',os:'请选择系列',om:'请先选择系列',oy:'请选择年款',search:'搜索编码功能名称...',sel:'已选择',items:'个项目',sa:'全选当前筛选',cl:'清空选择',gen:'📋 生成编码方案',tut:'📖 X431使用教程',out:'📋 编码方案',ok:'已验证',hw:'需硬件',ml:'跨模块',steps:'步',projs:'个项目',mods:'个模块/项目',noMatch:'没有匹配的编码项，请调整筛选条件',alert:'请先选择至少一项编码',warn:'⚠️ 操作提醒：编码前截图/记录所有原值 · 一次只改一项 · 改完验证再改下一项 · 编码中不要关闭电源'},en:{title:'🏎️ Porsche X431 Coding Assistant',sub:'981 / 718 / 991 / Macan · Multi-step · Cross-module grouping · Bilingual',series:'Series',model:'Model',year:'Year',os:'Select Series',om:'Select Series first',oy:'Select Year',search:'Search coding items...',sel:'Selected',items:'items',sa:'Select All',cl:'Clear All',gen:'📋 Generate Plan',tut:'📖 X431 Tutorial',out:'📋 Coding Plan',ok:'Verified',hw:'Needs HW',ml:'Cross-Module',steps:'steps',projs:'projects',mods:'modules',noMatch:'No matching items. Adjust filters.',alert:'Please select at least one item',warn:'⚠️ Reminder: Backup original values · One change at a time · Verify before next change · Don\'t power off during coding'}};
 const MNE={"组合仪表":"Instrument Cluster","前端电子设备":"Front-End Electronics","后端电子设备":"Rear-End Electronics","空调模块":"Air Conditioning","DME模块":"DME","PSM模块":"PSM","转向助力":"EPS","网关模块":"Gateway","座椅模块":"Seat Memory","方向盘电子设备":"Steering Wheel","前摄像头":"Front Camera","头灯模块":"Headlight","泊车辅助":"Park Assist","声浪模拟器":"Sound Symposer","跨模块":"Cross-Module"};
 function tk(k){return T[lang][k]||k}
-function setLang(l){lang=l;document.querySelectorAll('.lang-toggle button').forEach(b=>{b.classList.toggle('active',b.textContent===(l==='zh'?'中文':'EN'))});document.getElementById('titleH1').textContent=tk('title');document.getElementById('titleSub').textContent=tk('sub');document.getElementById('lblSeries').textContent=tk('series');document.getElementById('lblModel').textContent=tk('model');document.getElementById('lblYear').textContent=tk('year');document.getElementById('optSeries').textContent=tk('os');document.getElementById('optModel').textContent=tk('om');document.getElementById('optYear').textContent=tk('oy');document.getElementById('searchPlaceholder').placeholder=tk('search');filterItems()}
+function setLang(l){lang=l;document.querySelectorAll('.lang-toggle button').forEach(b=>{b.classList.toggle('active',b.textContent===(l==='zh'?'中文':'EN'))});document.getElementById('titleH1').textContent=tk('title');document.getElementById('titleSub').textContent=tk('sub');document.getElementById('lblSeries').textContent=tk('series');document.getElementById('lblModel').textContent=tk('model');document.getElementById('lblYear').textContent=tk('year');document.getElementById('optSeries').textContent=tk('os');document.getElementById('optModel').textContent=tk('om');document.getElementById('optYear').textContent=tk('oy');document.getElementById('searchInput').placeholder=tk('search');renderModuleFilter();filterItems()}
+
+// Override setModule for language-aware button matching
+const _sm=setModule;
+setModule=function(m){activeModule=m;document.querySelectorAll('.module-btn').forEach(b=>{const allLabel=lang==='zh'?'全部':'All';const mLabel=lang==='en'?(MNE[m]||m):m;b.classList.toggle('active',(m==='all'&&b.textContent===allLabel)||b.textContent===mLabel)});filterItems()}
 
 // Override renderModuleFilter
 const _rmf=renderModuleFilter;
