@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>保时捷 X431 刷隐藏编码助手</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f1117;--card:#1a1d27;--border:#2a2d3a;--accent:#e8a838;--accent2:#d4922e;--text:#e4e4e7;--text2:#9ca3af;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;--purple:#a855f7}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;-webkit-tap-highlight-color:transparent}
+.container{max-width:1200px;margin:0 auto;padding:20px}
+header{text-align:center;padding:30px 0 20px;border-bottom:1px solid var(--border);margin-bottom:30px}
+header h1{font-size:28px;color:var(--accent);margin-bottom:8px}
+header p{color:var(--text2);font-size:14px}
+.car-select{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;align-items:end}
+.car-select .group{flex:1;min-width:180px}
+.car-select label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
+.car-select select{width:100%;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;cursor:pointer;-webkit-appearance:none;appearance:none}
+.car-select select:focus{outline:none;border-color:var(--accent)}
+.module-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.module-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:12px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.module-btn:hover,.module-btn:active{border-color:var(--accent);color:var(--text)}
+.module-btn.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600}
+.search-box{position:relative;margin-bottom:16px}
+.search-box input{width:100%;padding:10px 12px 10px 36px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px}
+.search-box input:focus{outline:none;border-color:var(--accent)}
+.search-box::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px}
+.items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:10px;max-height:500px;overflow-y:auto;padding:4px;margin-bottom:20px;-webkit-overflow-scrolling:touch}
+.items-grid::-webkit-scrollbar{width:6px}
+.items-grid::-webkit-scrollbar-track{background:var(--card);border-radius:3px}
+.items-grid::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.item-card{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s}
+.item-card:hover,.item-card:active{border-color:var(--accent);transform:translateY(-1px)}
+.item-card.selected{border-color:var(--accent);background:rgba(232,168,56,.08)}
+.item-card input[type=checkbox]{margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0}
+.item-info{flex:1;min-width:0}
+.item-info .name{font-size:13px;font-weight:500;margin-bottom:2px}
+.item-info .module-tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:10px;margin-right:4px;margin-bottom:2px}
+.item-info .compat{font-size:11px;color:var(--text2)}
+.item-info .steps-count{display:inline-block;font-size:10px;padding:1px 6px;border-radius:10px;background:var(--accent)22;color:var(--accent);margin-left:4px}
+.tag-仪表{background:#3b82f622;color:#60a5fa}.tag-前端{background:#22c55e22;color:#4ade80}.tag-后端{background:#a855f722;color:#c084fc}
+.tag-空调{background:#f9731622;color:#fb923c}.tag-DME{background:#ef444422;color:#f87171}.tag-PSM{background:#eab30822;color:#facc15}
+.tag-转向{background:#06b6d422;color:#22d3ee}.tag-网关{background:#ec489922;color:#f472b6}.tag-座椅{background:#8b5cf622;color:#a78bfa}
+.tag-方向盘{background:#14b8a622;color:#2dd4bf}.tag-摄像头{background:#f43f5e22;color:#fb7185}.tag-大灯{background:#84cc1622;color:#a3e635}
+.tag-泊车{background:#0ea5e922;color:#38bdf8}.tag-声浪{background:#d946ef22;color:#e879f9}.tag-跨模块{background:#e8a83822;color:#e8a838}
+.output-section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:24px}
+.output-section h2{color:var(--accent);font-size:18px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.output-section h2 .count{background:var(--accent);color:#000;padding:2px 8px;border-radius:10px;font-size:12px}
+.module-group{margin-bottom:20px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.module-group h3{background:var(--border);padding:10px 16px;font-size:14px;display:flex;align-items:center;gap:8px}
+.module-group .steps{padding:12px 16px}
+.project-block{margin-bottom:16px;padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--border)}
+.project-block .project-title{font-weight:600;font-size:14px;margin-bottom:8px;color:var(--accent)}
+.project-block .project-title .en{color:var(--text2);font-weight:400;font-size:12px}
+.step{display:grid;grid-template-columns:40px 1fr;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:none}
+.step-num{background:var(--accent);color:#000;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.step-detail{font-size:12px}
+.step-detail .path-zh{color:var(--text);margin-bottom:1px;word-break:break-all}
+.step-detail .path-en{color:var(--text2);font-size:11px;margin-bottom:3px;word-break:break-all}
+.step-detail .val{display:flex;gap:6px;align-items:center;font-size:11px;flex-wrap:wrap}
+.step-detail .val .from{color:var(--red);text-decoration:line-through}
+.step-detail .val .arrow{color:var(--text2)}
+.step-detail .val .to{color:var(--green);font-weight:600}
+.step-detail .note{color:var(--accent);font-size:11px;margin-top:2px}
+.btn{padding:10px 20px;border-radius:8px;border:none;font-size:14px;cursor:pointer;font-weight:600;transition:all .2s}
+.btn-primary{background:var(--accent);color:#000}
+.btn-primary:hover,.btn-primary:active{background:var(--accent2)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover,.btn-outline:active{border-color:var(--accent);color:var(--accent)}
+.btn-group{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:1000;justify-content:center;align-items:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:700px;width:100%;max-height:85vh;overflow-y:auto;padding:24px;-webkit-overflow-scrolling:touch}
+.modal h2{color:var(--accent);margin-bottom:16px;font-size:20px}
+.modal h3{color:var(--blue);margin:16px 0 8px;font-size:15px}
+.modal p,.modal li{font-size:13px;color:var(--text);margin-bottom:6px}
+.modal ol,.modal ul{padding-left:20px}
+.modal .close-btn{float:right;background:none;border:none;color:var(--text2);font-size:28px;cursor:pointer;padding:4px 8px}
+.modal .close-btn:hover,.modal .close-btn:active{color:var(--text)}
+.modal .tip{background:var(--accent)11;border-left:3px solid var(--accent);padding:10px 12px;border-radius:0 8px 8px 0;margin:10px 0;font-size:12px}
+.empty{text-align:center;padding:60px 20px;color:var(--text2)}
+.empty .icon{font-size:48px;margin-bottom:12px}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.badge-ok{background:#22c55e22;color:#4ade80}
+.badge-hw{background:#3b82f622;color:#60a5fa}
+.badge-multi{background:#e8a83822;color:#e8a838}
+.actions-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin:16px 0}
+.selected-count{font-size:13px;color:var(--text2)}
+.selected-count span{color:var(--accent);font-weight:600}
+/* ====== 移动端适配 ====== */
+@media(max-width:768px){
+  .container{padding:12px}
+  header{padding:20px 0 16px;margin-bottom:20px}
+  header h1{font-size:20px}
+  header p{font-size:12px;line-height:1.4}
+  .car-select{flex-direction:column;gap:8px;margin-bottom:16px}
+  .car-select .group{min-width:100%}
+  .car-select label{font-size:11px}
+  .car-select select{padding:12px;font-size:15px}
+  .module-filter{gap:6px;margin-bottom:12px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  .module-filter::-webkit-scrollbar{display:none}
+  .module-btn{padding:8px 14px;font-size:12px;flex-shrink:0}
+  .search-box input{padding:12px 12px 12px 36px;font-size:15px}
+  .items-grid{grid-template-columns:1fr;max-height:400px;gap:8px}
+  .item-card{padding:12px;gap:8px}
+  .item-card input[type=checkbox]{width:20px;height:20px}
+  .item-info .name{font-size:14px}
+  .item-info .compat{font-size:12px}
+  .actions-bar{flex-direction:column;align-items:stretch;gap:8px}
+  .selected-count{text-align:center;font-size:14px}
+  .btn-group{flex-direction:column;gap:8px}
+  .btn{padding:14px 20px;font-size:15px;text-align:center;width:100%}
+  .btn-outline,.btn-primary{width:100%}
+  .output-section{padding:16px;margin-top:16px}
+  .output-section h2{font-size:16px}
+  .module-group h3{padding:10px 12px;font-size:13px;flex-wrap:wrap}
+  .module-group .steps{padding:10px 12px}
+  .project-block{padding:10px}
+  .project-block .project-title{font-size:13px}
+  .step{grid-template-columns:32px 1fr;gap:6px;padding:8px 0}
+  .step-num{width:28px;height:28px;font-size:12px}
+  .step-detail{font-size:13px}
+  .step-detail .path-zh{font-size:13px;line-height:1.5}
+  .step-detail .path-en{font-size:11px}
+  .step-detail .val{font-size:12px}
+  .modal-overlay{padding:10px}
+  .modal{padding:16px;border-radius:12px;max-height:90vh}
+  .modal h2{font-size:18px}
+  .modal h3{font-size:14px}
+  .modal p,.modal li{font-size:13px}
+  .modal .close-btn{font-size:32px;padding:8px}
+}
+/* 超小屏幕 */
+@media(max-width:380px){
+  .container{padding:8px}
+  header h1{font-size:18px}
+  .module-btn{padding:6px 10px;font-size:11px}
+  .item-info .name{font-size:13px}
+  .step{grid-template-columns:28px 1fr}
+}
+/* 浮动操作栏（手机端） */
+.fab-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:10px 16px;z-index:100;gap:8px}
+.fab-bar .fab-count{flex:1;display:flex;align-items:center;font-size:13px;color:var(--text2)}
+.fab-bar .fab-count span{color:var(--accent);font-weight:700;font-size:16px;margin:0 4px}
+.fab-bar .fab-btn{flex:2;padding:12px;border:none;border-radius:8px;background:var(--accent);color:#000;font-size:15px;font-weight:700;cursor:pointer}
+.fab-bar .fab-tutorial{width:44px;height:44px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+body.has-fab{padding-bottom:70px}
+@media(max-width:768px){.fab-bar{display:flex}}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🏎️ 保时捷 X431 刷隐藏编码助手</h1>
+    <p>覆盖 981 / 718 / 991 / Macan · 多步骤项目一键展开 · 跨模块自动分组 · 中英双语</p>
+  </header>
+  <div class="car-select">
+    <div class="group"><label>车型系列</label><select id="series" onchange="updateModels()"><option value="">请选择系列</option><option value="718">718 (Boxster/Cayman)</option><option value="981">981 (Boxster/Cayman)</option><option value="991.1">991.1 (Carrera/Turbo/GT3)</option><option value="991.2">991.2 (Carrera/Turbo/GT3)</option><option value="macan">Macan</option></select></div>
+    <div class="group"><label>具体型号</label><select id="model"><option value="">请先选择系列</option></select></div>
+    <div class="group"><label>年款</label><select id="year"><option value="">请选择年款</option></select></div>
+  </div>
+  <div class="module-filter" id="moduleFilter"></div>
+  <div class="search-box"><input type="text" id="searchInput" placeholder="搜索编码功能名称..." oninput="filterItems()"></div>
+  <div class="actions-bar">
+    <div class="selected-count">已选择 <span id="selectedCount">0</span> 个项目</div>
+    <div class="btn-group">
+      <button class="btn btn-outline" onclick="selectAll()">全选当前筛选</button>
+      <button class="btn btn-outline" onclick="clearAll()">清空选择</button>
+      <button class="btn btn-primary" onclick="generateOutput()">📋 生成编码方案</button>
+      <button class="btn btn-outline" onclick="showTutorial()">📖 X431使用教程</button>
+    </div>
+  </div>
+  <div class="items-grid" id="itemsGrid"></div>
+  <div class="output-section" id="outputSection" style="display:none">
+    <h2>📋 编码方案 <span class="count" id="outputCount">0</span></h2>
+    <div id="outputContent"></div>
+  </div>
+</div>
+<!-- 浮动操作栏（手机端底部固定） -->
+<div class="fab-bar" id="fabBar">
+  <div class="fab-count">已选 <span id="fabCount">0</span> 项</div>
+  <button class="fab-tutorial" onclick="showTutorial()">📖</button>
+  <button class="fab-btn" onclick="generateOutput()">📋 生成编码方案</button>
+</div>
+
+<div class="modal-overlay" id="tutorialModal">
+  <div class="modal">
+    <button class="close-btn" onclick="closeTutorial()">×</button>
+    <h2>📖 X431 使用教程</h2>
+    <h3>一、准备工作</h3>
+    <ol><li>将 X431 插入 OBD2 接口（驾驶员侧仪表板下方）</li><li>钥匙转到 ACC 模式（通电不启动）</li><li><b>关闭所有不必要电器</b>：关门、关空调、关大灯、关 PCM</li><li>MFD 显示电池电压监控</li></ol>
+    <h3>二、Launch CRP919x / E 操作流程</h3>
+    <ol><li>返回箭头 → 主界面 → <b>诊断(Diagnose)</b></li><li>向下滚动 → <b>保时捷(Porsche)</b> → 确定</li><li><b>自动搜索(Automatically Search)</b> → 识别车型 → 确定</li><li><b>系统选择(System Selection)</b></li><li>选择对应的<b>系统模块</b>（如：前端电子设备、组合仪表、空调等）</li><li><b>编码/刷隐藏(Code/Brush Hiding)</b></li><li><b>刷隐藏/修改(Brush Hidden/Modified)</b>（支持搜索）</li><li>找到编码项 → 修改值 → <b>写入编码(Write Code)</b></li></ol>
+    <h3>三、Thinkdiag 操作流程</h3>
+    <ol><li>安装 Thinkdiag App（仅安卓支持编码）</li><li>插入 OBD2 → 蓝牙配对</li><li><b>全系统诊断(All Systems Diagnostic)</b> → <b>保时捷</b></li><li><b>自动搜索</b> → 确定 → <b>系统选择</b></li><li>选模块 → <b>编码/刷隐藏</b> → <b>刷隐藏/修改</b></li><li>找到编码项 → 修改 → <b>写入编码(Write Code)</b></li></ol>
+    <h3>四、设备选购</h3>
+    <ul><li><b>Launch CRP919x/E</b>：~$400，到期仍可编码</li><li><b>Thinkdiag</b>：~$100，需安卓，年费~$40</li><li>⚠️ 必须支持 <b>Ecu Coding</b>，Lite版不行</li></ul>
+    <h3>五、注意事项</h3>
+    <div class="tip">⚠️ <b>每次只改一项</b>，改完验证再改下一项<br>⚠️ <b>改前截图/记录原值</b><br>⚠️ 编码中不要关电源<br>⚠️ 写入报错可能是顺序或兼容性问题<br>⚠️ 安全模块(Airbag/PSM)谨慎操作</div>
+  </div>
+</div>
+<script>
+// ==================== 数据结构 ====================
+// 每个项目(id)对应一个功能，包含 steps[] 数组（多步骤编码）
+// multiModule:true = 跨模块项目，筛选时归入"跨模块"分类
+// compat = 适用车型系列
+const ITEMS = [
+  // ====== 组合仪表 - 单模块项目 ======
+  {id:1,module:"组合仪表",name:"更改仪表显示车型",nameEn:"Vehicle Variant",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"改Turbo会导致油箱显示消失",
+   steps:[{pathZh:"车载电脑显示配置→车辆变量",pathEn:"Vehicle Variant",from:"Boxster S",to:"自选（GT4/Turbo等）"}]},
+  {id:2,module:"组合仪表",name:"显示真实水温",nameEn:"Coolant temperature characteristic curve",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"冷却液温度特性曲线 - 把X值复制到Y值",pathEn:"Coolant temperature characteristic curve - copy X to Y",from:"80-110℃映射为90℃",to:"实际温度"},
+    {pathZh:"条柱图设置-冷却液温度条柱图起始",pathEn:"Bargraph settings-coolant temperature bargraph start",from:"60",to:"36"}]},
+  {id:3,module:"组合仪表",name:"速度表精确校准",nameEn:"Distance correction characteristic",compat:["718"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"距离校正特性-输出特性-Y2~Y8",pathEn:"Distance correction characteristic-Y2~Y8",from:"22/52/103/155/206/256/347",to:"20/50/100/150/200/250/340"}]},
+  {id:4,module:"组合仪表",name:"油量四段显示",nameEn:"Oil Level 4 Segments",compat:["718","991.2"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"进一步编码-字节0-油位",pathEn:"Further codings-byte 0-Oil Level",from:"1 Segment",to:"4 Segments"}]},
+  {id:5,module:"组合仪表",name:"涡轮压力显示范围",nameEn:"Boost Pressure Display",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"涡轮车",
+   steps:[{pathZh:"进一步编码-最大增压压力",pathEn:"Further Codings-Max Boost Pressure",from:"1.10",to:"原厂1.3 / 调校1.6-2.0"},
+    {pathZh:"进一步编码-运动增压压力",pathEn:"Further Codings-Sport boost pressure",from:"1.10",to:"同上"}]},
+  {id:6,module:"组合仪表",name:"Macan增压压力柱状图激活",nameEn:"Macan Boost Pressure Bar Chart",compat:["macan"],compatStatus:"ok",note:"基础款Macan",
+   steps:[{pathZh:"车载电脑菜单配置-字节0-增压压力(柱状图表)=启用",pathEn:"Board computer menu config-byte 0-Boost pressure(bar chart)=enabled",from:"未启用",to:"启用"},
+    {pathZh:"设码值-编码字节0-可见图标增压压力=启用",pathEn:"Coding value-Coding byte 0-Visible icon boost pressure=enabled",from:"未启用",to:"启用"},
+    {pathZh:"进一步编码2-字节2-增压压力运动响应柱状图表显示=是（后期车型才有）",pathEn:"Further codings 2-byte 2-Boost pressure sport response bar chart=Yes",from:"无/否",to:"是"},
+    {pathZh:"进一步编码-最大增压压力",pathEn:"Further Codings-Max boost pressure",from:"1.0",to:"1.3（原厂）/ 1.6-2.0（调校）"},
+    {pathZh:"进一步编码-运动增压压力",pathEn:"Further Codings-Sport boost pressure",from:"1.0",to:"同上"}]},
+  {id:7,module:"组合仪表",name:"性能/G力显示",nameEn:"Performance Display / G Force",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"车载电脑菜单配置7-性能显示=1",pathEn:"Board computer menu configuration 7-Performance Display=1",from:"0",to:"1"},
+    {pathZh:"车载电脑菜单配置字节7-性能显示选择=功率和旋矩",pathEn:"Board computer menu configuration byte 7-Performance display section=Performance Readout+Torque Readout",from:"Torque Display",to:"Performance Readout+Torque Readout"},
+    {pathZh:"车载电脑菜单配置字节4-重力=1",pathEn:"Board computer menu configuration byte 4-G force=1",from:"0",to:"1"}]},
+  {id:8,module:"组合仪表",name:"换挡辅助显示",nameEn:"Upshift Display / Gear Shift Assist",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"981需额外调优数据",
+   steps:[{pathZh:"车载电脑菜单配置字节7-升档显示=1",pathEn:"Board computer menu configuration byte 7-Upshift Display=1",from:"0",to:"1"}]},
+  {id:9,module:"组合仪表",name:"滑行显示图标",nameEn:"Sailing display",compat:["718","991.2"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"设码值-编码字节1-航行显示=1",pathEn:"Coding value-Coding byte 1-Sailing display=1",from:"0",to:"1"},
+    {pathZh:"设码值-编码字节1-航行显示in MAP=1",pathEn:"Coding value-Coding byte 1-Sailing display in MAP=1",from:"0",to:"1"}]},
+  {id:10,module:"组合仪表",name:"中性档显示(N档图标)",nameEn:"N Display activated",compat:["718","991.2"],compatStatus:"ok",note:"718/991.2独有",
+   steps:[{pathZh:"进一步编码2-字节20-N显示激活=yes",pathEn:"Further codings byte 20-N Display activated=yes",from:"no",to:"yes"}]},
+  {id:11,module:"组合仪表",name:"日行灯菜单",nameEn:"Daytime running light menu",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"需配合前端电子DDL specification=No",
+   steps:[{pathZh:"车载电脑菜单配置字节1-日间行车灯=1",pathEn:"Board computer menu config byte 1-Daytime running light=1",from:"0",to:"1"}]},
+  {id:12,module:"组合仪表",name:"自动雨刮菜单",nameEn:"Rain sensor menu",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"车载电脑菜单配置字节1-雨量传感器=1",pathEn:"Board computer menu config byte 1-Rain sensor=1",from:"0",to:"1"}]},
+  {id:13,module:"组合仪表",name:"Sport模式显示",nameEn:"Sport Individual",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"车载电脑配置2字节0-运动个性化=1",pathEn:"Board computer menu configuration 2 byte 0-Sport Individual=1",from:"0",to:"1"}]},
+  {id:14,module:"组合仪表",name:"专家菜单",nameEn:"Expert menu",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"车载电脑菜单配置字节4-专家菜单=1",pathEn:"Board computer menu config byte 4-Expert menu=1",from:"0",to:"1"},
+    {pathZh:"开发接口-通用系统-专家菜单始终激活=Yes",pathEn:"Development interfaces-General system-Expert menu always active=Yes",from:"No",to:"Yes"}]},
+  {id:15,module:"组合仪表",name:"升降档推荐菜单",nameEn:"Shift recommendation",compat:["718","991.2"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"车载电脑菜单配置字节3-换挡推荐=1",pathEn:"Board computer menu config byte 3-Shift recommendation=1",from:"0",to:"1"}]},
+  {id:16,module:"组合仪表",name:"自动记忆功能",nameEn:"Auto Memory",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"需记忆座椅",
+   steps:[{pathZh:"车载电脑菜单配置字节2-Auto-MEM=1",pathEn:"Board computer menu config byte 2-Auto-MEM=1",from:"0",to:"1"},
+    {pathZh:"车载电脑显示配置钥匙1-BC配置字节1-Auto-MEM=Open",pathEn:"BC config key 1-byte 1-Auto-MEM=Open",from:"Shutdown",to:"Open"},
+    {pathZh:"车载电脑显示配置钥匙2-BC配置字节1-Auto-MEM=Open",pathEn:"BC config key 2-byte 1-Auto-MEM=Open",from:"Shutdown",to:"Open"},
+    {pathZh:"车载电脑显示配置出厂设置-BC配置字节1-Auto-MEM=1",pathEn:"BC config factory setting-byte 1-Auto-MEM=1",from:"0",to:"1"}]},
+  {id:17,module:"组合仪表",name:"改善1-3档平顺性",nameEn:"Gear Smoothness (VM A Off / VM SPORT)",compat:["981","718","991.1","991.2"],compatStatus:"ok",note:"docx实测有效 · Macan无此编码",
+   steps:[{pathZh:"车载电脑菜单配置字节6-消耗措施-VM A Off=1",pathEn:"Board computer menu config byte 6-consumption measures-VM A Off=1",from:"0",to:"1"},
+    {pathZh:"车载电脑菜单配置字节6-消耗措施-VM A Off sailing=1",pathEn:"Board computer menu config byte 6-VM A Off sailing=1",from:"0",to:"1"},
+    {pathZh:"车载电脑菜单配置字节6-消耗措施-VM A off Start/Stop=1",pathEn:"Board computer menu config byte 6-VM A off Start/Stop=1",from:"0",to:"1"},
+    {pathZh:"车载电脑菜单配置字节6-消耗措施-VM A Off ECO shift points=1",pathEn:"Board computer menu config byte 6-VM A Off ECO shift points=1",from:"0",to:"1"},
+    {pathZh:"车载电脑菜单配置字节6-消耗措施-VM SPORT=1",pathEn:"Board computer menu config byte 6-VM SPORT=1",from:"0",to:"1"},
+    {pathZh:"车载电脑菜单配置字节6-消耗措施-VM SPORT ECO shift points=1",pathEn:"Board computer menu config byte 6-VM SPORT ECO shift points=1",from:"0",to:"1"},
+    {pathZh:"车载电脑菜单配置字节6-消耗措施-VM SPORT sailing=1",pathEn:"Board computer menu config byte 6-VM SPORT sailing=1",from:"0",to:"1"},
+    {pathZh:"车载电脑菜单配置字节6-消耗措施-VM SPORT Start-Stop=1",pathEn:"Board computer menu config byte 6-VM SPORT Start-Stop=1",from:"0",to:"1"}]},
+  {id:18,module:"组合仪表",name:"Joker-运动排气",nameEn:"Joker sport exhaust system",compat:["718","991.2","macan"],compatStatus:"ok",note:"981/991.1不支持",
+   steps:[{pathZh:"车载电脑配置2字节2-Joker运动排气系统=1",pathEn:"Board computer menu configuration 2 byte 2-Joker sport exhaust system=1",from:"0",to:"1"}]},
+  {id:19,module:"组合仪表",name:"Joker-启停",nameEn:"Joker Start/Stop",compat:["718","991.2","macan"],compatStatus:"ok",note:"981/991.1不支持",
+   steps:[{pathZh:"车载电脑配置2字节2-Joker启停=1",pathEn:"Board computer menu configuration 2 byte 2-Joker Start/Stop=1",from:"0",to:"1"}]},
+  {id:20,module:"组合仪表",name:"Joker-Sport Plus(Macan SC用)",nameEn:"Joker Sport Plus",compat:["macan"],compatStatus:"ok",note:"Macan SC激活专用",
+   steps:[{pathZh:"车载电脑配置2字节2-Joker Sport Plus=1",pathEn:"Board computer menu configuration 2 byte 2-Joker Sport Plus=1",from:"0",to:"1"}]},
+  {id:21,module:"组合仪表",name:"关闭安全带警告",nameEn:"Seatbelt Warnings Off",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"设码值-编码字节2-驾驶员安全带警告=0",pathEn:"Coding value-Coding byte 2-Driver seatbelt warning=0",from:"1",to:"0"},
+    {pathZh:"设码值-编码字节2-副驾安全带警告=0",pathEn:"Coding value-Coding byte 2-Passenger seatbelt warning=0",from:"1",to:"0"},
+    {pathZh:"设码值-编码字节2-美国安全带警告=0",pathEn:"Coding value-Coding byte 2-USA seatbelt warning=0",from:"1",to:"0"},
+    {pathZh:"设码值-编码字节2-声学安全带警告(非美国加拿大)=0",pathEn:"Coding value-Coding byte 2-Acoustic belt warning=0",from:"1",to:"0"}]},
+  {id:22,module:"组合仪表",name:"关闭绿色近光指示灯",nameEn:"Low-beam indicator off",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"警告灯-指示灯编码-近光=Shutdown",pathEn:"Warning Lamps-Indicator Lamps Coding-Low-beam=Shutdown",from:"Open",to:"Shutdown"}]},
+  {id:23,module:"组合仪表",name:"关闭升档箭头",nameEn:"Eco display shutdown",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"BC配置字节4-Eco显示(key1)=Shutdown",pathEn:"BC config byte 4-Eco display(key1)=Shutdown",from:"Open",to:"Shutdown"},
+    {pathZh:"BC配置字节4-Eco显示(key2)=Shutdown",pathEn:"BC config byte 4-Eco display(key2)=Shutdown",from:"Open",to:"Shutdown"},
+    {pathZh:"设码值-编码字节0-Eco显示in Sport模式=Shutdown",pathEn:"Coding value-Coding byte 0-ECO display in sport mode=Shutdown",from:"Open",to:"Shutdown"},
+    {pathZh:"设码值-编码字节0-Eco显示in Sport Plus模式=Shutdown",pathEn:"Coding value-Coding byte 0-ECO display in sport plus mode=Shutdown",from:"Open",to:"Shutdown"}]},
+  {id:24,module:"组合仪表",name:"关闭车门开启警告",nameEn:"Door open warning off",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"警告配置-BCM前部-车门/前盖打开时车辆静止=0",pathEn:"Warning configuration-BCM_front-Door open when stationary=0",from:"1",to:"0"}]},
+  {id:25,module:"组合仪表",name:"多钥匙检测警告",nameEn:"Several keys detected",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"警告配置-BCM前部-车内检测到多把钥匙=1",pathEn:"Warning configuration-BCM_front-Several keys in vehicle detected=1",from:"0",to:"1"}]},
+  {id:26,module:"组合仪表",name:"泊车辅助静音",nameEn:"Park Assist quiet",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"声音参数-泊车辅助-通道匹配安静=0 dB",pathEn:"Sound parameter-Park Assist-channel matching quiet=0 dB",from:"18 dB",to:"0 dB"}]},
+  {id:27,module:"组合仪表",name:"自动锁车速度",nameEn:"Speed threshold for Autolock",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"通用参数-自动锁车速度阈值",pathEn:"General parameter-Speed threshold for Autolock",from:"5 km/h",to:"自定义"}]},
+  {id:28,module:"组合仪表",name:"重新上锁时间",nameEn:"Relocking time",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"通用参数-车门重新上锁时间",pathEn:"General parameter-Relocking time of doors",from:"30 S",to:"120 S"}]},
+  {id:29,module:"组合仪表",name:"锁车自动收后视镜(菜单开关)",nameEn:"Mirror fold-in menu",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"原厂电耳只需此项；后加装需额外开Driver's Door模块",
+   steps:[{pathZh:"BC配置字节9-锁车-后视镜折叠=on",pathEn:"BC config byte 9-locking-mirror fold-in=on",from:"off",to:"on"},
+    {pathZh:"车载电脑菜单配置字节2-后视镜折叠=yes",pathEn:"Board computer menu config byte 2-mirror fold-in=yes",from:"no",to:"yes"}]},
+  {id:30,module:"组合仪表",name:"Sport Chrono计时器亮度",nameEn:"PWM_MaxS (SC Clock Brightness)",compat:["981","718","991.1","991.2","macan"],compatStatus:"hw",note:"需有Sport Chrono硬件",
+   steps:[{pathZh:"Additional Instrument Watch模块-编码值-PWM_MaxS",pathEn:"Additional Instrument Watch-Coding value-PWM_MaxS",from:"106",to:"0-255(越大越亮)"}]},
+  {id:31,module:"组合仪表",name:"导航显示激活",nameEn:"Navi Map + LVDS",compat:["981","718","991.1","991.2","macan"],compatStatus:"hw",note:"需MIB AIO+LVDS线",
+   steps:[{pathZh:"车载电脑菜单配置字节0-Navi地图=1",pathEn:"Board computer menu config byte 0-Navi Map=1",from:"0",to:"1"},
+    {pathZh:"车载电脑菜单配置字节0-LVDS=1",pathEn:"Board computer menu config byte 0-LVDS=1",from:"0",to:"1"}]},
+  {id:32,module:"组合仪表",name:"油耗显示",nameEn:"Fuel Consumption Display",compat:["718","991.2"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"车载电脑菜单配置字节0-平均消耗=1",pathEn:"Board computer menu config byte 0-Average consumption=1",from:"0",to:"1"},
+    {pathZh:"涡轮/消耗值-消耗值-最大值=99.9",pathEn:"Turbo/vacuum consumption values-Maximum=99.9",from:"26.9 l/100km",to:"99.9 l/100km"}]},
+  {id:33,module:"组合仪表",name:"油温/水温条柱图设置",nameEn:"Bargraph Settings",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"条柱图设置-冷却液温度条柱图起始",pathEn:"Bargraph settings-coolant temperature bargraph start",from:"60",to:"36"},
+    {pathZh:"条柱图设置-油温度条柱图起始",pathEn:"Bargraph settings-Oil temperature bargraph start",from:"60",to:"自定义"}]},
+
+  // ====== 前端电子设备 - 单模块项目 ======
+  {id:101,module:"前端电子设备",name:"转向灯闪烁次数",nameEn:"One touch flashing cycles",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"外部照明数据-单触闪烁周期",pathEn:"Exterior Lights Parameters-One touch flashing cycles",from:"3",to:"5(最大10)"}]},
+  {id:102,module:"前端电子设备",name:"斯堪的纳维亚DRL(仪表背光+尾灯常亮)",nameEn:"DD lights with marker light",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"外部照明-DD灯带标记灯=Yes",pathEn:"Exterior lights: DD lights with marker light=Yes",from:"No",to:"Yes"}]},
+  {id:103,module:"前端电子设备",name:"日行灯菜单激活(配合仪表)",nameEn:"DDL specification + PCM activation",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"配合仪表日行灯菜单",
+   steps:[{pathZh:"外部照明-外部照明：DDL规范=No",pathEn:"Exterior lighting: DDL specification=No",from:"Yes",to:"No"},
+    {pathZh:"外部照明：DD灯可通过PCM/仪表激活=Yes",pathEn:"Exterior lights: DD lights can be activated via PCM=Yes",from:"No",to:"Yes"}]},
+  {id:104,module:"前端电子设备",name:"仪表背光常亮",nameEn:"Gauge Illumination Always On",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"调光-通用配置-中央表盘白色=Yes",pathEn:"Dimming-general configuration-Central dial white=Yes",from:"No",to:"Yes"},
+    {pathZh:"调光-通用配置-所有表盘白色=Yes(含指针)",pathEn:"Dimming-general configuration-All dials white=Yes",from:"No",to:"Yes"}]},
+  {id:105,module:"前端电子设备",name:"近光灯进入/退出",nameEn:"Coming/Leaving Home with dipped beam",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"外部照明：Coming/Leaving Home用近光=Yes",pathEn:"Exterior lights: coming/leaving home with dipped beam=Yes",from:"No",to:"Yes"}]},
+  {id:106,module:"前端电子设备",name:"紧急刹车双闪",nameEn:"Emergency brake warning flashing",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"外部照明：紧急制动显示时警告闪烁=Yes",pathEn:"Exterior lights: warning flashing with emergency brake display=Yes",from:"No",to:"Yes"}]},
+  {id:107,module:"前端电子设备",name:"锁车声音关闭",nameEn:"Acoustic feedback off",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"通用-中控锁声音反馈=No",pathEn:"General-Acoustic feedback for central locking=No",from:"Yes",to:"No"}]},
+  {id:108,module:"前端电子设备",name:"钥匙控制车窗开/关",nameEn:"Window Comfort Opening/Closing",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"舒适功能-车窗舒适开启=Yes",pathEn:"Comfort functions-Window Comfort Opening=Yes",from:"No",to:"Yes"},
+    {pathZh:"舒适功能-车窗舒适关闭=Yes",pathEn:"Comfort functions-Window Comfort Closing=Yes",from:"No",to:"Yes"}]},
+  {id:109,module:"前端电子设备",name:"钥匙控制敞篷开/关",nameEn:"Convertible top comfort",compat:["981","718","991.1","991.2"],compatStatus:"ok",note:"敞篷车型",
+   steps:[{pathZh:"舒适功能-敞篷舒适开启=Yes",pathEn:"Comfort functions-Convertible top comfort opening=Yes",from:"No",to:"Yes"},
+    {pathZh:"舒适功能-敞篷舒适关闭=Yes",pathEn:"Comfort functions-Convertible top comfort closing=Yes",from:"No",to:"Yes"}]},
+  {id:110,module:"前端电子设备",name:"雨刮after wipe",nameEn:"Teardrop function",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"WWS编码-雨滴功能激活=Yes",pathEn:"WWS Coding-Teardrop function active=Yes",from:"No",to:"Yes"}]},
+  {id:111,module:"前端电子设备",name:"雨量传感器激活",nameEn:"Rain sensor equipment",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"两个编码都要改",
+   steps:[{pathZh:"编码值-设备-雨量传感器设备=Yes",pathEn:"Coding value-Equipment-Rain sensor equipment=Yes",from:"No",to:"Yes"},
+    {pathZh:"RLS编码-RLS编码-雨水传感器未激活=No",pathEn:"RLS coding-RLS codings-Rain Sensor inactive=No",from:"Yes",to:"No"}]},
+  {id:112,module:"前端电子设备",name:"开前盖不解锁车门",nameEn:"Central locking with lid unlock",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"通用-中控锁随盖/后盖解锁开启=No",pathEn:"General-Central locking opens with lid/rear lid unlocking=No",from:"Yes",to:"No"}]},
+  {id:113,module:"前端电子设备",name:"开盖后自动重新上锁",nameEn:"Relocking starts with lid closed",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"通用-重新上锁随盖关闭启动=Yes",pathEn:"General-Relocking starts with lid closed=Yes",from:"No",to:"Yes"}]},
+  {id:114,module:"前端电子设备",name:"后视镜迎宾灯",nameEn:"Courtesy lighting in mirror",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"左右门模块都要改",
+   steps:[{pathZh:"Driver's Door模块-编码-照明-后视镜区域照明=active",pathEn:"Driver's Door-Coding-Illumination-Courtesy lighting in mirror=active",from:"not active",to:"active"},
+    {pathZh:"Passenger Door模块-编码-照明-后视镜区域照明=active",pathEn:"Passenger Door-Coding-Illumination-Courtesy lighting in mirror=active",from:"not active",to:"active"}]},
+  {id:115,module:"前端电子设备",name:"后视镜同步调节",nameEn:"Synchronous mirror adjustment",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"编码-外后视镜1-同步后视镜调节=Active",pathEn:"Coding-Exterior rearview mirror 1-Synchronous mirror adjustment=Active",from:"Not Active",to:"Active"}]},
+
+  // ====== 后端电子设备 - 单模块项目 ======
+  {id:201,module:"后端电子设备",name:"紧急刹车灯闪烁",nameEn:"Emergency Brake Display (EBD)",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"多项参数需一起改",
+   steps:[{pathZh:"编码值-外部照明-紧急制动显示功能可用=Yes",pathEn:"Coding Value-Exterior Lighting-Emergency brake display function available=Yes",from:"No",to:"Yes"},
+    {pathZh:"EBD参数-EBD制动灯闪烁开启-速度开启=3",pathEn:"EBD parameter-EBD stop lamp flashing on-speed on=3",from:"70",to:"3"},
+    {pathZh:"EBD参数-EBD制动灯闪烁减速度开启=0.45",pathEn:"EBD parameter-EBD stop lamp flashing deceleration on=0.45",from:"0.81",to:"0.45"},
+    {pathZh:"EBD参数-EBD制动灯闪烁减速度关闭=0.35",pathEn:"EBD parameter-EBD stop lamp flashing deceleration off=0.35",from:"0.71",to:"0.35"},
+    {pathZh:"EBD参数-EBD制动灯闪烁持续时间=1",pathEn:"EBD parameter-EBD stop lamp flashing run-on time=1",from:"0",to:"1"}]},
+  {id:202,module:"后端电子设备",name:"4点LED大灯时亮",nameEn:"DD as marker light",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"外部照明：DD灯作为标记灯=Yes",pathEn:"Exterior Lights: DD as marker light=Yes",from:"No",to:"Yes"},
+    {pathZh:"外部照明参数-DD灯作为标记灯调光值=100",pathEn:"Exterior Lighting Parameter-Dimming value for DD lights as marker light=100",from:"6",to:"100"}]},
+  {id:203,module:"后端电子设备",name:"排气刷大(关闭排气阀门)",nameEn:"Exhaust flap disable",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"阀门永久打开排气更响",
+   steps:[{pathZh:"编码值-设备-排气活门控制设备=否",pathEn:"Coding value-Equipment-Exhaust flap control equipment=No",from:"是",to:"否"}]},
+  {id:204,module:"后端电子设备",name:"敞篷一键开关",nameEn:"Convertible Top Touch Control",compat:["981","718","991.1","991.2"],compatStatus:"ok",note:"敞篷车型",
+   steps:[{pathZh:"软顶编码-981软顶编码-触摸控制=Yes",pathEn:"Soft top coding-981 soft top codings-Touch Control=Yes",from:"No",to:"Yes"},
+    {pathZh:"通用参数-敞篷下限速度(蠕行模式)=0",pathEn:"General Parameters-Convertible Top, Lower Limit Speed for inching mode=0",from:"10",to:"0"},
+    {pathZh:"软顶编码-触摸开篷后关闭车窗=Yes",pathEn:"Soft top coding-Close power window after open soft top with touch control=Yes",from:"No",to:"Yes"}]},
+  {id:205,module:"后端电子设备",name:"遥控开篷+自动关窗",nameEn:"Convertible Top Remote Control",compat:["981","718","991.1","991.2"],compatStatus:"ok",note:"敞篷车型",
+   steps:[{pathZh:"软顶编码-981软顶编码-遥控舒适功能=Yes",pathEn:"Soft top coding-981 soft top codings-Comfort function soft top remote control=Yes",from:"No",to:"Yes"},
+    {pathZh:"软顶编码-遥控开篷后关闭车窗=Yes",pathEn:"Soft top coding-Close power window after open soft top with remote control=Yes",from:"No",to:"Yes"},
+    {pathZh:"软顶编码-遥控关篷后关闭车窗=Yes",pathEn:"Soft top coding-Close power window after close soft top with remote control=Yes",from:"No",to:"Yes"}]},
+  {id:206,module:"后端电子设备",name:"尾翼自定义(高度+速度)",nameEn:"Spoiler Parameters",compat:["981","718","991.1","991.2"],compatStatus:"ok",note:"多项参数，按需调整",
+   steps:[{pathZh:"尾翼参数-SollPosDrehHallSp1(默认高度)",pathEn:"Spoiler parameter-SollPosDrehHallSp1(default height)",from:"0",to:"自定义(可>0给静止时运动感)"},
+    {pathZh:"尾翼参数-SollPosDrehHallSp2/3/4(一级/二级/三级高度)",pathEn:"Spoiler parameter-SollPosDrehHallSp2/3/4(1st/2nd/3rd height)",from:"112/150/150",to:"自定义(<390)"},
+    {pathZh:"尾翼参数-GeschwschwEinf1/2/3(一级/二级/三级升速)",pathEn:"Spoiler parameter-GeschwschwEinf1/2/3(deploy speeds)",from:"120/654/654",to:"自定义"},
+    {pathZh:"尾翼参数-Extending 1/2/3 speed threshold(降速)",pathEn:"Spoiler parameter-Extending 1/2/3 speed threshold(retract speeds)",from:"80/639/639",to:"自定义"},
+    {pathZh:"尾翼编码-尾翼控制,SportPlus=Yes",pathEn:"Spoiler coding-Spoiler control, SportPlus=Yes",from:"No",to:"Yes(需Sport+)"},
+    {pathZh:"尾翼编码-Last-mode(终端15)激活=Yes",pathEn:"Spoiler coding-Last-mode(terminal 15) active=Yes",from:"No",to:"Yes"}]},
+  {id:207,module:"后端电子设备",name:"关闭车内监控报警",nameEn:"Interior monitoring off",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"锁车后车内移动不触发警报",
+   steps:[{pathZh:"TWS报警系统-车内监控安装=no",pathEn:"TWS Alarm system-interior monitoring installed=no",from:"yes",to:"no"}]},
+
+  // ====== 空调模块 - 单模块项目 ======
+  {id:301,module:"空调模块",name:"启停记忆",nameEn:"ASS Last Mode Memory",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"也记忆PASM状态",
+   steps:[{pathZh:"设码值-默认行驶状态编码值=上一模式",pathEn:"Coding value-Default Driving State Coding Value=Last Mode",from:"Eco ON",to:"Last Mode"},
+    {pathZh:"设码值-默认行驶状态编码值上一模式=是",pathEn:"Coding value-Default Driving State Coding Value Last Mode=Yes",from:"No",to:"Yes"}]},
+  {id:302,module:"空调模块",name:"启动时默认关闭启停",nameEn:"ASS Default Off",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"和启停记忆二选一",
+   steps:[{pathZh:"设码值-默认行驶状态编码值=高效关闭",pathEn:"Coding value-Default Driving State Coding Value=Eco Off",from:"Eco ON",to:"Eco Off"}]},
+  {id:303,module:"空调模块",name:"关闭启停按键",nameEn:"Efficiency off button hidden",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"设码值-钥匙字段编码值-高效关闭按钮可用=否",pathEn:"Coding value-Key field coding-Efficiency off button available=No",from:"是",to:"否"}]},
+  {id:304,module:"空调模块",name:"HVAC记忆模式",nameEn:"Memory concept",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"记忆概念-套件选项",pathEn:"Memory concept-Package options",from:"Comfort Memory",to:"Driver Memory / Basis Memory"}]},
+
+  // ====== DME模块 - 单模块项目 ======
+  {id:401,module:"DME模块",name:"燃油市场",nameEn:"Fuel Market",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"实测差异不明显",
+   steps:[{pathZh:"设码值-编码字节2-燃油市场=A(欧洲)",pathEn:"Coding value-Coding byte 2-Fuel market=A(Europe)",from:"B(美国)",to:"A(欧洲)"}]},
+
+  // ====== PSM模块 - 单模块项目 ======
+  {id:501,module:"PSM模块",name:"PSM Sport激活",nameEn:"PSM-Sport",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"功能编码-编码字节3-PSM-Sport",pathEn:"Function coding-Coding byte 3-PSM-Sport",from:"PSM On And Off Available",to:"PSM On, Sport And Off Available"}]},
+  {id:502,module:"PSM模块",name:"PTV电子扭矩分配",nameEn:"PTV Porsche Torque Vectoring",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"功能编码-编码字节2-PTV=Open",pathEn:"Function coding-Coding byte 2-PTV=Open",from:"Shutdown",to:"Open"}]},
+  {id:503,module:"PSM模块",name:"刹车助力map",nameEn:"Hydraulic Brake Assist",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"A最强/C最弱",
+   steps:[{pathZh:"功能编码-编码字节1-液压制动辅助",pathEn:"Function coding-Coding byte 1-Hydraulic brake assist",from:"HBA Threshold C",to:"HBA Threshold A(最强)/B"}]},
+  {id:504,module:"PSM模块",name:"开门拉手刹关闭+同时关闭启停",nameEn:"Rolling prevention off",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"同时关闭启停",
+   steps:[{pathZh:"功能编码-编码字节1-防溜车=Shutdown",pathEn:"Function coding-Coding byte 1-Rolling prevention=Shutdown",from:"Open",to:"Shutdown"},
+    {pathZh:"警告配置-发动机警告-启停模式故障(134)=0",pathEn:"Warning configuration-Engine Warnings-Start/stop mode failure(134)=0",from:"1",to:"0"}]},
+
+  // ====== 转向助力 - 单模块项目 ======
+  {id:601,module:"转向助力",name:"转向助力升级(Servotronic)",nameEn:"Servotronic",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"⚠️不要在前端电子模块改",
+   steps:[{pathZh:"设码值-编码-伺服电子系统=1",pathEn:"Coding value-Coding-Servotronic=1",from:"Inactive",to:"1"}]},
+  {id:602,module:"转向助力",name:"更换转向助力map",nameEn:"Steering Model Line",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"设码值-编码-车型线",pathEn:"Coding value-Coding-Model line",from:"982 Boxster(S)/Cayman(S)",to:"自选profile"}]},
+
+  // ====== 网关 - 单模块项目 ======
+  {id:701,module:"网关模块",name:"关闭PASM",nameEn:"PASM button actuated",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"指定安装列表-车辆安装列表字节6-PASM按键已操作=Not Installed",pathEn:"Specified installation list-byte 6-PASM button actuated=Not Installed",from:"Installed",to:"Not Installed"}]},
+
+  // ====== 方向盘 - 单模块项目 ======
+  {id:801,module:"方向盘电子设备",name:"多功能方向盘激活",nameEn:"Multifunction steering wheel",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"编码值-编码字节1-多功能方向盘[LIN]=Yes",pathEn:"Coding value-Coding byte 1-Multifunction steering wheel [LIN]=Yes",from:"No",to:"Yes"}]},
+  {id:802,module:"方向盘电子设备",name:"方向盘加热温度调节",nameEn:"Steering wheel heater temperature",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"读写参数-方向盘加热目标温度",pathEn:"Read/write parameter-Steering wheel heater target temperature",from:"35℃",to:"自定义"}]},
+
+  // ====== 座椅 ======
+  {id:901,module:"座椅模块",name:"舒适进出行程增大",nameEn:"Comfort Entry/Exit travel",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"需记忆座椅",
+   steps:[{pathZh:"舒适进出调节行程-座椅前后移动行程",pathEn:"Comfort Entry/Exit adjustment travel-seat fore/aft movement",from:"26",to:"50"}]},
+
+  // ====== 泊车 ======
+  {id:1001,module:"泊车辅助",name:"倒车影像关闭速度",nameEn:"Reverse camera off speed",compat:["981","718","991.1","991.2","macan"],compatStatus:"ok",note:"",
+   steps:[{pathZh:"ECU编码数据-OPS关闭速度阈值",pathEn:"ECU coding data-OPS switch-off speed threshold",from:"16",to:"5"},
+    {pathZh:"速度阈值-系统关闭速度",pathEn:"Speed Thresholds-System switch-off speed",from:"16",to:"5"},
+    {pathZh:"速度阈值-系统关闭速度显示就绪",pathEn:"Speed Thresholds-System switch-off speed display readiness",from:"16",to:"5"}]},
+
+  // ====== 声浪 ======
+  {id:1101,module:"声浪模拟器",name:"声浪音量调节/关闭",nameEn:"Soundaktor Volume",compat:["718","991.2"],compatStatus:"ok",note:"仅Soundaktor车型，非GT4/Spyder",
+   steps:[{pathZh:"结构声执行器响度",pathEn:"Loudness_actuator_for_structure_borne_sound",from:"100",to:"0(关闭)~100(最大)"}]},
+
+  // ====== 跨模块项目（multiModule:true） ======
+  {id:9001,module:"跨模块",name:"Sport Chrono直刷激活(含弹射)",nameEn:"Sport Chrono Activation + Launch Control",compat:["981","991.1","macan"],compatStatus:"ok",note:"早期车型0成本直刷 · 718/991.2不能直刷需硬件",multiModule:true,
+   steps:[
+    {module:"组合仪表",pathZh:"车载电脑显示配置钥匙1-BC配置字节19-BC-role Chrono=打开",pathEn:"BC config key 1-byte 19-BC-role Chrono=Open",from:"Shutdown",to:"Open"},
+    {module:"组合仪表",pathZh:"车载电脑显示配置钥匙2-BC配置字节19-BC-role Chrono=打开",pathEn:"BC config key 2-byte 19-BC-role Chrono=Open",from:"Shutdown",to:"Open"},
+    {module:"组合仪表",pathZh:"车载电脑显示配置出厂设置-BC配置字节19-BC-role Chrono=打开",pathEn:"BC config factory setting-byte 19-BC-role Chrono=Open",from:"Shutdown",to:"Open"},
+    {module:"组合仪表",pathZh:"进一步编码-显示设置-辅助显示段Sport Plus=是",pathEn:"Further codings-Display-Auxiliary display segment Sport Plus=Yes",from:"否",to:"是"},
+    {module:"空调模块",pathZh:"设码值-钥匙字段编码值-SportPlus按钮可用=是",pathEn:"Coding value-Key field coding-SportPlus button available=Yes",from:"否",to:"是"},
+    {module:"方向盘电子设备",pathZh:"编码值-编码字节1-弹射起步显示=是 ★直接激活弹射",pathEn:"Coding value-Coding byte 1-Launch Control Display=Yes ★activates Launch Control",from:"否",to:"是"},
+    {module:"空调模块",compat:["981","991.1"],pathZh:"BKE钥匙字段钥匙分配-左侧按钮2=运动增强型(Sport Plus)",pathEn:"BKE key field key assignment-Left button 2=Sport Plus",from:"PASM",to:"运动增强型"},
+    {module:"组合仪表",compat:["macan"],pathZh:"车载电脑配置2-字节2-Joker Sport Plus=1",pathEn:"Board computer menu configuration 2-byte 2-Joker Sport Plus=1",from:"0",to:"1"}
+   ]},
+  {id:9002,module:"跨模块",name:"后加装运排控制激活(718/981/991)",nameEn:"Aftermarket Exhaust Control (718/981/991)",compat:["981","718","991.1","991.2"],compatStatus:"ok",note:"需加装协议模块(~800元)或按钮(~300-400元)",multiModule:true,
+   steps:[
+    {module:"后端电子设备",pathZh:"编码值-设备-排气活门控制设备=是",pathEn:"Coding value-Equipment-Exhaust flap control equipment=Yes",from:"否",to:"是"},
+    {module:"DME模块",pathZh:"设码值-编码字节1-排气活门的电磁切换阀=是",pathEn:"Coding value-Coding byte 1-Exhaust flap solenoid valve=Yes",from:"否",to:"是"},
+    {module:"空调模块",pathZh:"设码值-钥匙字段编码值-运动型排气按钮可用=是",pathEn:"Coding value-Key field coding-Sport exhaust flap available=Yes",from:"否",to:"是"},
+    {module:"空调模块",pathZh:"【方案A】BKE钥匙字段钥匙分配-右侧按钮3=运动型排气系统(推荐：加在启停下方)",pathEn:"[Plan A] BKE key field key assignment-Right button 3=Sport exhaust system(recommended)",from:"不分配",to:"运动型排气系统"},
+    {module:"空调模块",pathZh:"【方案B】右侧按钮2=运动型排气系统 + 右侧按钮3=启动/停止(原厂运排位置)",pathEn:"[Plan B] Right button 2=Sport exhaust + Right button 3=Start/Stop(factory position)",from:"原厂",to:"调整顺序"}
+   ]},
+  {id:9003,module:"跨模块",name:"后加装运排控制激活(Macan)",nameEn:"Aftermarket Exhaust Control (Macan)",compat:["macan"],compatStatus:"ok",note:"需加装协议模块(~800元)",multiModule:true,
+   steps:[
+    {module:"后端电子设备",pathZh:"编码值-设备-排气活门控制设备=是",pathEn:"Coding value-Equipment-Exhaust flap control equipment=Yes",from:"否",to:"是"},
+    {module:"DME模块",pathZh:"设码值-编码字节1-排气活门的电磁切换阀=是",pathEn:"Coding value-Coding byte 1-Exhaust flap solenoid valve=Yes",from:"否",to:"是"},
+    {module:"空调模块",pathZh:"设码值-钥匙字段编码值-运动型排气按钮可用=是",pathEn:"Coding value-Key field coding-Sport exhaust flap available=Yes",from:"否",to:"是"},
+    {module:"空调模块",pathZh:"右侧组合快捷键-数据记录=越野，车道偏离警告，运动型排气系统，启动/停止",pathEn:"Right keyboard shortcut-Data Record=Off-road, LDW, Sport exhaust, Start/Stop",from:"原厂顺序",to:"含运排的新顺序"}
+   ]},
+  {id:9004,module:"跨模块",name:"Macan自动远光灯激活",nameEn:"Macan Auto High Beam",compat:["macan"],compatStatus:"hw",note:"需有前摄像头(前挡风梯形摄像头)",multiModule:true,
+   steps:[
+    {module:"组合仪表",pathZh:"警告灯-指示灯编码-远光灯辅助=1",pathEn:"Warning Lamps-Indicator Lamps coding-High beam assist=1",from:"0",to:"1"},
+    {module:"组合仪表",pathZh:"车载电脑菜单配置2-字节0-远光灯辅助=1",pathEn:"Board computer menu configuration 2-byte 0-High beam assist=1",from:"0",to:"1"},
+    {module:"组合仪表",pathZh:"车载电脑显示配置出厂设置-BC配置字节13-远光灯辅助=1",pathEn:"BC config factory setting-BC config byte 13-High beam assist=1",from:"0",to:"1"},
+    {module:"前端电子设备",pathZh:"进一步编码-远光辅助(FLA)编码-远光辅助(FLA)存在=是",pathEn:"Further codings-FLA coding-FLA present=Yes",from:"No",to:"Yes"},
+    {module:"前摄像头",pathZh:"设码值-AFS编码灯辅助=远光灯辅助",pathEn:"Coding value-Coding light assistance=High beam assist",from:"各车不同",to:"远光灯辅助"},
+    {module:"前摄像头",pathZh:"主灯光关闭低速阈值=15",pathEn:"Lower_speed_threshold_for_main_beam_off=15",from:"27",to:"15"},
+    {module:"前摄像头",pathZh:"主灯光打开低速阈值=20",pathEn:"Lower_speed_threshold_for_main_beam_on=20",from:"57",to:"20"}
+   ]},
+];
+
+const seriesModels={"718":["Boxster","Boxster S","Boxster GTS","Boxster T","Cayman","Cayman S","Cayman T","Cayman GTS","Cayman GT4","Spyder"],"981":["Boxster","Boxster S","Cayman","Cayman S"],"991.1":["Carrera","Carrera S","Carrera 4S","Turbo","Turbo S","GT3","Targa 4 GTS"],"991.2":["Carrera","Carrera S","Carrera 4S","Turbo","Turbo S","GT3","Targa"],"macan":["Macan","Macan S","Macan GTS","Macan Turbo"]};
+const seriesYears={"718":["2017","2018","2019","2020","2021","2022","2023","2024","2025"],"981":["2013","2014","2015","2016"],"991.1":["2012","2013","2014","2015","2016"],"991.2":["2017","2018","2019"],"macan":["2014","2015","2016","2017","2019","2020","2021","2022","2023","2024"]};
+const moduleColors={"组合仪表":"仪表","前端电子设备":"前端","后端电子设备":"后端","空调模块":"空调","DME模块":"DME","PSM模块":"PSM","转向助力":"转向","网关模块":"网关","座椅模块":"座椅","方向盘电子设备":"方向盘","前摄像头":"摄像头","头灯模块":"大灯","泊车辅助":"泊车","声浪模拟器":"声浪","跨模块":"跨模块"};
+let selectedIds=new Set();let activeModule="all";
+function updateModels(){const s=document.getElementById('series').value;const m=document.getElementById('model');const y=document.getElementById('year');m.innerHTML='<option value="">请选择型号</option>';y.innerHTML='<option value="">请选择年款</option>';if(s&&seriesModels[s]){seriesModels[s].forEach(v=>m.innerHTML+=`<option value="${v}">${v}</option>`);seriesYears[s].forEach(v=>y.innerHTML+=`<option value="${v}">${v}</option>`)}filterItems()}
+function getModules(){const mods=new Set();ITEMS.forEach(i=>mods.add(i.module));return[...mods]}
+function renderModuleFilter(){const el=document.getElementById('moduleFilter');el.innerHTML='<button class="module-btn active" onclick="setModule(\'all\')">全部</button>';getModules().forEach(m=>{el.innerHTML+=`<button class="module-btn" onclick="setModule('${m}')">${m}</button>`})}
+function setModule(m){activeModule=m;document.querySelectorAll('.module-btn').forEach(b=>{b.classList.toggle('active',(m==='all'&&b.textContent==='全部')||b.textContent===m)});filterItems()}
+function filterItems(){const series=document.getElementById('series').value;const search=document.getElementById('searchInput').value.toLowerCase();const grid=document.getElementById('itemsGrid');grid.innerHTML='';const filtered=ITEMS.filter(item=>{if(activeModule!=='all'&&item.module!==activeModule)return false;if(search&&!item.name.toLowerCase().includes(search)&&!item.nameEn.toLowerCase().includes(search)&&!item.module.includes(search))return false;if(series&&!item.compat.includes(series))return false;return true});if(filtered.length===0){grid.innerHTML='<div class="empty"><div class="icon">🔍</div><p>没有匹配的编码项，请调整筛选条件</p></div>';return}
+filtered.forEach(item=>{const tag=moduleColors[item.module]||item.module;const checked=selectedIds.has(item.id)?'checked':'';const selClass=selectedIds.has(item.id)?'selected':'';let badges='';if(item.compatStatus==='ok')badges+='<span class="badge badge-ok">已验证</span>';else if(item.compatStatus==='hw')badges+='<span class="badge badge-hw">需硬件</span>';if(item.multiModule)badges+='<span class="badge badge-multi">跨模块</span>';const stepCount=item.steps.length>1?`<span class="steps-count">${item.steps.length}步</span>`:'';grid.innerHTML+=`<div class="item-card ${selClass}" onclick="toggleItem(${item.id},this)"><input type="checkbox" ${checked} onclick="event.stopPropagation();toggleItem(${item.id},this.parentElement)"><div class="item-info"><div class="name">${item.name}${stepCount}</div><span class="module-tag tag-${tag}">${item.module}</span>${badges}<div class="compat">${item.compat.join(' / ')}${item.note?' · '+item.note:''}</div></div></div>`});updateCount()}
+function toggleItem(id,el){if(selectedIds.has(id))selectedIds.delete(id);else selectedIds.add(id);const cb=el.querySelector('input[type=checkbox]');if(cb)cb.checked=selectedIds.has(id);el.classList.toggle('selected',selectedIds.has(id));updateCount()}
+function updateCount(){document.getElementById('selectedCount').textContent=selectedIds.size;const fab=document.getElementById('fabCount');if(fab)fab.textContent=selectedIds.size;document.body.classList.toggle('has-fab',selectedIds.size>0)}
+function selectAll(){const series=document.getElementById('series').value;const search=document.getElementById('searchInput').value.toLowerCase();ITEMS.filter(item=>{if(activeModule!=='all'&&item.module!==activeModule)return false;if(search&&!item.name.toLowerCase().includes(search)&&!item.nameEn.toLowerCase().includes(search))return false;if(series&&!item.compat.includes(series))return false;return true}).forEach(i=>selectedIds.add(i.id));filterItems()}
+function clearAll(){selectedIds.clear();filterItems()}
+function generateOutput(){if(selectedIds.size===0){alert('请先选择至少一项编码');return}
+const series=document.getElementById('series').value;const model=document.getElementById('model').value;const year=document.getElementById('year').value;const carInfo=[year,series,model].filter(Boolean).join(' ')||'未选择车型';const selected=ITEMS.filter(i=>selectedIds.has(i.id));
+// Filter steps by car series: if step has compat, only show when series matches; if no compat, always show
+function filterSteps(steps,series){if(!series)return steps;return steps.filter(s=>!s.compat||s.compat.includes(series))}
+// Sort steps by module so same-module steps are grouped together, preserving original order within each module
+function sortStepsByModule(steps){const order=[];const seen=new Set();steps.forEach(s=>{const m=s.module||'';if(!seen.has(m)){seen.add(m);order.push(m)}});return[...steps].sort((a,b)=>{const ai=order.indexOf(a.module||'');const bi=order.indexOf(b.module||'');return ai-bi})}
+// Render steps grouped by module with sub-headers
+function renderSteps(steps,series,startIdx){
+  const filtered=sortStepsByModule(filterSteps(steps,series));
+  let h='';let lastModule='';let idx=0;
+  filtered.forEach(step=>{
+    const mTag=moduleColors[step.module]||'跨模块';
+    if(step.module&&step.module!==lastModule){h+=`<div style="margin:8px 0 4px;font-size:11px;color:var(--accent);font-weight:600;border-bottom:1px solid var(--border);padding-bottom:4px">📂 ${step.module}</div>`;lastModule=step.module}
+    h+=`<div class="step"><div class="step-num">${startIdx+idx+1}</div><div class="step-detail"><div class="path-zh">🇨🇳 ${step.pathZh}</div><div class="path-en">🇬🇧 ${step.pathEn}</div><div class="val"><span class="from">${step.from}</span><span class="arrow">→</span><span class="to">${step.to}</span></div></div></div>`;idx++});
+  return h}
+// Group by module
+const groups={};selected.forEach(item=>{if(item.multiModule){const key="跨模块："+item.name;if(!groups[key])groups[key]={multi:true,item:item};}else{if(!groups[item.module])groups[item.module]={multi:false,items:[]};groups[item.module].items.push(item)}});
+let totalSteps=0;selected.forEach(i=>{totalSteps+=filterSteps(i.steps,series).length});
+let html=`<div style="margin-bottom:16px;padding:12px;background:var(--border);border-radius:8px;font-size:13px">🚗 <b>车型</b>：${carInfo} &nbsp;|&nbsp; 📋 <b>共 ${selected.length} 个项目 · ${totalSteps} 个编码步骤</b> &nbsp;|&nbsp; 涉及 ${Object.keys(groups).length} 个模块/项目</div>`;
+for(const[key,g]of Object.entries(groups)){
+if(g.multi){const item=g.item;const filtered=filterSteps(item.steps,series);html+=`<div class="module-group"><h3><span class="module-tag tag-跨模块">跨模块</span> ${item.name} <span style="color:var(--text2);font-size:12px">${item.nameEn}</span> <span style="color:var(--text2);font-size:11px">${filtered.length}步</span></h3><div class="steps">${renderSteps(item.steps,series,0)}</div>`;if(item.note)html+=`<div style="padding:8px 16px;font-size:12px;color:var(--accent)">⚠️ ${item.note}</div>`;html+='</div>'}
+else{let allSteps=[];g.items.forEach(item=>{allSteps=allSteps.concat(filterSteps(item.steps,series))});html+=`<div class="module-group"><h3><span class="module-tag tag-${moduleColors[key]||key}">${key}</span> ${g.items.length}个项目 · ${allSteps.length}步</h3><div class="steps">`;g.items.forEach(item=>{const filtered=filterSteps(item.steps,series);html+=`<div class="project-block"><div class="project-title">${item.name} <span class="en">${item.nameEn}</span> <span style="font-size:11px;color:var(--text2)">${filtered.length}步</span></div>${renderSteps(item.steps,series,0)}</div>`});html+='</div></div>'}}
+html+=`<div style="margin-top:16px;padding:12px;background:#e8a83811;border:1px solid var(--accent);border-radius:8px;font-size:12px">⚠️ <b>操作提醒</b>：编码前截图/记录所有原值 · 一次只改一项 · 改完验证再改下一项 · 编码中不要关闭电源</div>`;document.getElementById('outputContent').innerHTML=html;document.getElementById('outputCount').textContent=selected.length;document.getElementById('outputSection').style.display='block';document.getElementById('outputSection').scrollIntoView({behavior:'smooth'})}
+function showTutorial(){document.getElementById('tutorialModal').classList.add('show')}
+function closeTutorial(){document.getElementById('tutorialModal').classList.remove('show')}
+renderModuleFilter();filterItems();
+</script>
+</body>
+</html>
