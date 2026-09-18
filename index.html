@@ -4,9 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>保时捷 X431 刷隐藏编码助手</title>
+<meta name="description" content="保时捷 981 / 718 / 991 / Macan X431 刷隐藏编码助手：按车型筛选项目、跨模块自动分组、一键生成编码方案，支持中英双语。">
+<meta name="theme-color" content="#0f1117">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%8E%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0f1117;--card:#1a1d27;--border:#2a2d3a;--accent:#e8a838;--accent2:#d4922e;--text:#e4e4e7;--text2:#9ca3af;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;--purple:#a855f7}
+:root{--bg:#0f1117;--card:#1a1d27;--border:#2a2d3a;--accent:#e8a838;--accent-rgb:232,168,56;--accent2:#d4922e;--text:#e4e4e7;--text2:#9ca3af;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;--purple:#a855f7}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;-webkit-tap-highlight-color:transparent}
 .container{max-width:1200px;margin:0 auto;padding:20px}
 header{text-align:center;padding:30px 0 20px;border-bottom:1px solid var(--border);margin-bottom:30px}
@@ -37,7 +40,7 @@ header p{color:var(--text2);font-size:14px}
 .item-info .name{font-size:13px;font-weight:500;margin-bottom:2px}
 .item-info .module-tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:10px;margin-right:4px;margin-bottom:2px}
 .item-info .compat{font-size:11px;color:var(--text2)}
-.item-info .steps-count{display:inline-block;font-size:10px;padding:1px 6px;border-radius:10px;background:var(--accent)22;color:var(--accent);margin-left:4px}
+.item-info .steps-count{display:inline-block;font-size:10px;padding:1px 6px;border-radius:10px;background:rgba(var(--accent-rgb),.13);color:var(--accent);margin-left:4px}
 .tag-仪表{background:#3b82f622;color:#60a5fa}.tag-前端{background:#22c55e22;color:#4ade80}.tag-后端{background:#a855f722;color:#c084fc}
 .tag-空调{background:#f9731622;color:#fb923c}.tag-DME{background:#ef444422;color:#f87171}.tag-PSM{background:#eab30822;color:#facc15}
 .tag-转向{background:#06b6d422;color:#22d3ee}.tag-网关{background:#ec489922;color:#f472b6}.tag-座椅{background:#8b5cf622;color:#a78bfa}
@@ -78,7 +81,7 @@ header p{color:var(--text2);font-size:14px}
 .modal ol,.modal ul{padding-left:20px}
 .modal .close-btn{float:right;background:none;border:none;color:var(--text2);font-size:28px;cursor:pointer;padding:4px 8px}
 .modal .close-btn:hover,.modal .close-btn:active{color:var(--text)}
-.modal .tip{background:var(--accent)11;border-left:3px solid var(--accent);padding:10px 12px;border-radius:0 8px 8px 0;margin:10px 0;font-size:12px}
+.modal .tip{background:rgba(var(--accent-rgb),.07);border-left:3px solid var(--accent);padding:10px 12px;border-radius:0 8px 8px 0;margin:10px 0;font-size:12px}
 .empty{text-align:center;padding:60px 20px;color:var(--text2)}
 .empty .icon{font-size:48px;margin-bottom:12px}
 .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
@@ -145,12 +148,17 @@ header p{color:var(--text2);font-size:14px}
 .fab-bar .fab-count span{color:var(--accent);font-weight:700;font-size:16px;margin:0 4px}
 .fab-bar .fab-btn{flex:2;padding:12px;border:none;border-radius:8px;background:var(--accent);color:#000;font-size:15px;font-weight:700;cursor:pointer}
 .fab-bar .fab-tutorial{width:44px;height:44px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-body.has-fab{padding-bottom:70px}
-@media(max-width:768px){.fab-bar{display:flex}}
+@media(max-width:768px){.fab-bar{display:flex}body.has-fab{padding-bottom:70px}}
 .lang-toggle{display:inline-flex;border:1px solid var(--border);border-radius:20px;overflow:hidden;position:absolute;top:16px;right:16px}
 .lang-toggle button{padding:6px 16px;border:none;background:var(--card);color:var(--text2);font-size:12px;cursor:pointer;transition:all .2s}
 .lang-toggle button.active{background:var(--accent);color:#000;font-weight:600}
 header{position:relative}
+/* 手机端：语言切换不再绝对定位，避免压住标题 */
+@media(max-width:768px){
+  header{display:flex;flex-direction:column;align-items:center}
+  .lang-toggle{position:static;margin-bottom:12px;order:-1}
+  header h1{padding:0 4px}
+}
 </style>
 </head>
 <body>
@@ -490,18 +498,21 @@ document.getElementById('titleSub').textContent=is?'覆盖 981 / 718 / 991 / Mac
 document.getElementById('lblSeries').textContent=is?'车型系列':'Series';
 document.getElementById('lblModel').textContent=is?'具体型号':'Model';
 document.getElementById('lblYear').textContent=is?'年款':'Year';
-document.getElementById('optSeries').textContent=is?'请选择系列':'Select Series';
-document.getElementById('optModel').textContent=is?'请先选择系列':'Select Series first';
-document.getElementById('optYear').textContent=is?'请选择年款':'Select Year';
+const setTxt=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t};
+setTxt('optSeries',is?'请选择系列':'Select Series');
+setTxt('optModel',is?'请先选择系列':'Select Series first');
+setTxt('optYear',is?'请选择年款':'Select Year');
 document.getElementById('searchInput').placeholder=is?'搜索编码功能名称...':'Search coding items...';
 document.getElementById('btnSA').textContent=is?'全选当前筛选':'Select All';
 document.getElementById('btnCL').textContent=is?'清空选择':'Clear All';
 document.getElementById('btnGen').textContent=is?'📋 生成编码方案':'📋 Generate Plan';
 document.getElementById('btnTut').textContent=is?'📖 X431使用教程':'📖 X431 Tutorial';
-document.getElementById('lblOutput').innerHTML=is?'📋 编码方案 <span class="count" id="outputCount">0</span>':'📋 Coding Plan <span class="count" id="outputCount">0</span>';
+const _ocEl=document.getElementById('outputCount');const _ocVal=_ocEl?_ocEl.textContent:'0';
+document.getElementById('lblOutput').innerHTML=is?`📋 编码方案 <span class="count" id="outputCount">${_ocVal}</span>`:`📋 Coding Plan <span class="count" id="outputCount">${_ocVal}</span>`;
 document.getElementById('fabGen').textContent=is?'📋 生成编码方案':'📋 Generate Plan';
 document.getElementById('fabBar').querySelector('.fab-count').innerHTML=is?`已选 <span id="fabCount">${selectedIds.size}</span> 项`:`<span id="fabCount">${selectedIds.size}</span> selected`;
 updateModels();renderModuleFilter();filterItems();
+if(document.getElementById('outputSection').style.display!=='none')generateOutput();
 updateTutorialContent(l)}
 function updateTutorialContent(l){
 const is=l==='zh';
@@ -531,11 +542,11 @@ el.innerHTML=is?
 <h3>5. Important Notes</h3>
 <div class="tip">⚠️ <b>One change at a time</b> — verify before next change<br>⚠️ <b>Backup original values</b> (screenshots)<br>⚠️ Don\'t power off during coding<br>⚠️ Write errors may indicate wrong order or incompatibility<br>⚠️ Safety modules (Airbag/PSM) — proceed with caution</div>`;
 }
-function updateModels(){const s=document.getElementById('series').value;const m=document.getElementById('model');const y=document.getElementById('year');const mi=lang==='zh'?'请选择型号':'Select Model';const yi=lang==='zh'?'请选择年款':'Select Year';m.innerHTML=`<option value="">${mi}</option>`;y.innerHTML=`<option value="">${yi}</option>`;if(s&&seriesModels[s]){seriesModels[s].forEach(v=>m.innerHTML+=`<option value="${v}">${v}</option>`);(seriesYears[s]||[]).forEach(v=>y.innerHTML+=`<option value="${v}">${v}</option>`)}filterItems()}
+function updateModels(){const s=document.getElementById('series').value;const m=document.getElementById('model');const y=document.getElementById('year');const mv=m.value,yv=y.value;const mi=lang==='zh'?'请选择型号':'Select Model';const yi=lang==='zh'?'请选择年款':'Select Year';m.innerHTML=`<option value="" id="optModel">${mi}</option>`;y.innerHTML=`<option value="" id="optYear">${yi}</option>`;if(s&&seriesModels[s]){seriesModels[s].forEach(v=>m.innerHTML+=`<option value="${v}"${v===mv?' selected':''}>${v}</option>`);(seriesYears[s]||[]).forEach(v=>y.innerHTML+=`<option value="${v}"${v===yv?' selected':''}>${v}</option>`)}filterItems()}
 function getModules(){const mods=new Set();ITEMS.forEach(i=>mods.add(i.module));return[...mods]}
 function renderModuleFilter(){const el=document.getElementById('moduleFilter');const html=[`<button class="module-btn${activeModule==='all'?' active':''}" onclick="setModule('all')">${tk('all')}</button>`];getModules().forEach(m=>{html.push(`<button class="module-btn${activeModule===m?' active':''}" onclick="setModule('${m}')">${mn(m)}</button>`)});el.innerHTML=html.join('')}
 function setModule(m){activeModule=m;renderModuleFilter();filterItems()}
-function matchesFilter(item){const series=document.getElementById('series').value;const search=document.getElementById('searchInput').value.toLowerCase();if(activeModule!=='all'&&item.module!==activeModule)return false;if(search&&!item.name.toLowerCase().includes(search)&&!item.nameEn.toLowerCase().includes(search)&&!item.module.includes(search))return false;if(series&&!item.compat.includes(series))return false;return true}
+function matchesFilter(item){const series=document.getElementById('series').value;const search=document.getElementById('searchInput').value.toLowerCase();if(activeModule!=='all'&&item.module!==activeModule)return false;if(search&&!item.name.toLowerCase().includes(search)&&!item.nameEn.toLowerCase().includes(search)&&!item.module.toLowerCase().includes(search))return false;if(series&&!item.compat.includes(series))return false;return true}
 function filterItems(){const grid=document.getElementById('itemsGrid');const filtered=ITEMS.filter(matchesFilter);if(filtered.length===0){grid.innerHTML=`<div class="empty"><div class="icon">🔍</div><p>${tk('noMatch')}</p></div>`;return}
 const html=filtered.map(item=>{const tag=moduleColors[item.module]||item.module;const checked=selectedIds.has(item.id)?'checked':'';const selClass=selectedIds.has(item.id)?'selected':'';let badges='';if(item.compatStatus==='ok')badges+=`<span class="badge badge-ok">${tk('ok')}</span>`;else if(item.compatStatus==='hw')badges+=`<span class="badge badge-hw">${tk('hw')}</span>`;if(item.multiModule)badges+=`<span class="badge badge-multi">${tk('ml')}</span>`;const sc=item.steps.length>1?`<span class="steps-count">${item.steps.length}${tk('steps')}</span>`:'';const name=esc(dn(item));const modName=esc(mn(item.module));const compat=esc(item.compat.join(' / '));const note=item.note?esc(item.note):'';return `<div class="item-card ${selClass}" onclick="toggleItem(${item.id},this)"><input type="checkbox" ${checked} aria-label="${name}" onclick="event.stopPropagation();toggleItem(${item.id},this.parentElement)"><div class="item-info"><div class="name">${name}${sc}</div><span class="module-tag tag-${tag}">${modName}</span>${badges}<div class="compat">${compat}${note?' · '+note:''}</div></div></div>`}).join('');grid.innerHTML=html;updateCount()}
 function toggleItem(id,el){if(selectedIds.has(id))selectedIds.delete(id);else selectedIds.add(id);const cb=el.querySelector('input[type=checkbox]');if(cb)cb.checked=selectedIds.has(id);el.classList.toggle('selected',selectedIds.has(id));updateCount()}
@@ -567,7 +578,7 @@ else{let allSteps=[];g.items.forEach(item=>{allSteps=allSteps.concat(filterSteps
 html.push(`<div style="margin-top:16px;padding:12px;background:#e8a83811;border:1px solid var(--accent);border-radius:8px;font-size:12px">${tk('warn')}</div>`);document.getElementById('outputContent').innerHTML=html.join('');document.getElementById('outputCount').textContent=selected.length;document.getElementById('outputSection').style.display='block';document.getElementById('outputSection').scrollIntoView({behavior:'smooth'})}
 function showTutorial(){document.getElementById('tutorialModal').classList.add('show')}
 function closeTutorial(){document.getElementById('tutorialModal').classList.remove('show')}
-try{const saved=JSON.parse(localStorage.getItem('porscheCodingSelected')||'[]');if(Array.isArray(saved))saved.forEach(id=>{if(!isNaN(+id))selectedIds.add(+id)})}catch(e){}
+try{const saved=JSON.parse(localStorage.getItem('porscheCodingSelected')||'[]');if(Array.isArray(saved))saved.forEach(id=>{if(!isNaN(+id)&&ITEMS.some(i=>i.id===+id))selectedIds.add(+id)})}catch(e){}
 renderModuleFilter();filterItems();updateTutorialContent('zh');
 document.getElementById('tutorialModal').addEventListener('click',function(e){if(e.target.id==='tutorialModal')closeTutorial()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeTutorial()});
