@@ -148,7 +148,7 @@ header p{color:var(--text2);font-size:14px}
 .fab-bar .fab-count span{color:var(--accent);font-weight:700;font-size:16px;margin:0 4px}
 .fab-bar .fab-btn{flex:2;padding:12px;border:none;border-radius:8px;background:var(--accent);color:#000;font-size:15px;font-weight:700;cursor:pointer}
 .fab-bar .fab-tutorial{width:44px;height:44px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-@media(max-width:768px){.fab-bar{display:flex}body.has-fab{padding-bottom:70px}}
+@media(max-width:768px){.fab-bar{display:none}body.has-fab .fab-bar{display:flex}body.has-fab{padding-bottom:70px}}
 .lang-toggle{display:inline-flex;border:1px solid var(--border);border-radius:20px;overflow:hidden;position:absolute;top:16px;right:16px}
 .lang-toggle button{padding:6px 16px;border:none;background:var(--card);color:var(--text2);font-size:12px;cursor:pointer;transition:all .2s}
 .lang-toggle button.active{background:var(--accent);color:#000;font-weight:600}
@@ -485,7 +485,7 @@ const moduleColors={"组合仪表":"仪表","前端电子设备":"前端","后�
 let selectedIds=new Set();let activeModule="all";
 // Language system
 let lang='zh';
-const _T={zh:{all:'全部',noMatch:'没有匹配的编码项，请调整筛选条件',ok:'已验证',hw:'需硬件',ml:'跨模块',steps:'步',projs:'个项目',mods:'个模块/项目',warn:'⚠️ 操作提醒：编码前截图/记录所有原值 · 一次只改一项 · 改完验证再改下一项 · 编码中不要关闭电源',alert:'请先选择至少一项编码',car:'车型'},en:{all:'All',noMatch:'No matching items. Adjust filters.',ok:'Verified',hw:'Needs HW',ml:'Cross-Module',steps:'steps',projs:'projects',mods:'modules',warn:'⚠️ Reminder: Backup original values · One change at a time · Verify before next change · Don\'t power off during coding',alert:'Please select at least one item',car:'Car'}};
+const _T={zh:{all:'全部',noMatch:'没有匹配的编码项，请调整筛选条件',ok:'已验证',hw:'需硬件',ml:'跨模块',steps:'步',projs:'个项目',mods:'个模块/项目',warn:'⚠️ 操作提醒：编码前截图/记录所有原值 · 一次只改一项 · 改完验证再改下一项 · 编码中不要关闭电源',alert:'请先选择至少一项编码',car:'车型'},en:{all:'All',noMatch:'No matching items. Adjust filters.',ok:'Verified',hw:'Needs HW',ml:'Cross-Module',steps:' steps',projs:' projects',mods:' modules',warn:'⚠️ Reminder: Backup original values · One change at a time · Verify before next change · Don\'t power off during coding',alert:'Please select at least one item',car:'Car'}};
 const MNE={"组合仪表":"Instrument Cluster","前端电子设备":"Front-End Electronics","后端电子设备":"Rear-End Electronics","空调模块":"Air Conditioning","DME模块":"DME","PSM模块":"PSM","转向助力":"EPS","网关模块":"Gateway","座椅模块":"Seat Memory","方向盘电子设备":"Steering Wheel","前摄像头":"Front Camera","头灯模块":"Headlight","泊车辅助":"Park Assist","声浪模拟器":"Sound Symposer","跨模块":"Cross-Module"};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function tk(k){return _T[lang][k]||k}
@@ -542,7 +542,7 @@ el.innerHTML=is?
 <h3>5. Important Notes</h3>
 <div class="tip">⚠️ <b>One change at a time</b> — verify before next change<br>⚠️ <b>Backup original values</b> (screenshots)<br>⚠️ Don\'t power off during coding<br>⚠️ Write errors may indicate wrong order or incompatibility<br>⚠️ Safety modules (Airbag/PSM) — proceed with caution</div>`;
 }
-function updateModels(){const s=document.getElementById('series').value;const m=document.getElementById('model');const y=document.getElementById('year');const mv=m.value,yv=y.value;const mi=lang==='zh'?'请选择型号':'Select Model';const yi=lang==='zh'?'请选择年款':'Select Year';m.innerHTML=`<option value="" id="optModel">${mi}</option>`;y.innerHTML=`<option value="" id="optYear">${yi}</option>`;if(s&&seriesModels[s]){seriesModels[s].forEach(v=>m.innerHTML+=`<option value="${v}"${v===mv?' selected':''}>${v}</option>`);(seriesYears[s]||[]).forEach(v=>y.innerHTML+=`<option value="${v}"${v===yv?' selected':''}>${v}</option>`)}filterItems()}
+function updateModels(){const s=document.getElementById('series').value;const m=document.getElementById('model');const y=document.getElementById('year');const mv=m.value,yv=y.value;const mi=s?(lang==='zh'?'请选择型号':'Select Model'):(lang==='zh'?'请先选择系列':'Select Series');const yi=lang==='zh'?'请选择年款':'Select Year';m.innerHTML=`<option value="" id="optModel">${mi}</option>`;y.innerHTML=`<option value="" id="optYear">${yi}</option>`;if(s&&seriesModels[s]){seriesModels[s].forEach(v=>m.innerHTML+=`<option value="${v}"${v===mv?' selected':''}>${v}</option>`);(seriesYears[s]||[]).forEach(v=>y.innerHTML+=`<option value="${v}"${v===yv?' selected':''}>${v}</option>`)}filterItems()}
 function getModules(){const mods=new Set();ITEMS.forEach(i=>mods.add(i.module));return[...mods]}
 function renderModuleFilter(){const el=document.getElementById('moduleFilter');const html=[`<button class="module-btn${activeModule==='all'?' active':''}" onclick="setModule('all')">${tk('all')}</button>`];getModules().forEach(m=>{html.push(`<button class="module-btn${activeModule===m?' active':''}" onclick="setModule('${m}')">${mn(m)}</button>`)});el.innerHTML=html.join('')}
 function setModule(m){activeModule=m;renderModuleFilter();filterItems()}
